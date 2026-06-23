@@ -234,40 +234,30 @@ function About() {
   );
 }
 
+import contribData from './contribs.json';
+
 function Contributions() {
   const { t } = useI18n();
-  const [cells, setCells] = useState([]);
 
-  useEffect(() => {
-    fetch('https://api.github.com/users/alztrk/events?per_page=100').then(r => r.json()).then(events => {
-      if (!events.length) return;
-      const weeks = 52;
-      const now = new Date();
-      const days = [];
-      for (let i = 0; i < weeks * 7; i++) {
-        const d = new Date(now); d.setDate(d.getDate() - i);
-        days.push(d.toISOString().split('T')[0]);
-      }
-      const dayCount = {};
-        events.forEach(e => {
-          if (e.type === 'PushEvent') {
-            const d = e.created_at.split('T')[0];
-            dayCount[d] = (dayCount[d] || 0) + 1;
-          }
-        });
-      const max = Math.max(...Object.values(dayCount), 1);
-      const result = days.reverse().map(d => {
-        const count = dayCount[d] || 0;
-        const level = count > 0 ? Math.min(Math.ceil((count / max) * 4), 4) : 0;
-        return { date: d, count, level };
-      });
-      setCells(result);
-    }).catch(() => {});
-  }, []);
+  const weeks = contribData.weeks || [];
+  const cells = [];
+  const maxCount = Math.max(
+    1,
+    ...weeks.flatMap(w => w.contributionDays.map(d => d.contributionCount))
+  );
+
+  weeks.forEach(w => {
+    w.contributionDays.forEach(d => {
+      const level = d.contributionCount > 0
+        ? Math.min(Math.ceil((d.contributionCount / maxCount) * 4), 4)
+        : 0;
+      cells.push({ date: d.date, count: d.contributionCount, level });
+    });
+  });
 
   return (
     <Section id="contrib" num="02" title={t('contrib_title')}>
-      <p className="contrib-label">{t('contrib_desc')}</p>
+      <p className="contrib-label">{t('contrib_desc')} &middot; {contribData.totalContributions} {t('contrib_total')}</p>
       <div className="contrib-container">
         <div className="contrib-grid">
           {cells.map((c, i) => (
@@ -298,14 +288,8 @@ function Projects() {
 
   return (
     <Section id="projects" num="03" title={t('projects_title')}>
-      <div className="project-card featured">
-        <div className="project-screenshots">
-          <div className="screenshot-row">
-            <img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/readme-screenshots/home.png" alt="Tengra home screen" loading="lazy" />
-            <img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/readme-screenshots/workspace.png" alt="Tengra workspace" loading="lazy" />
-          </div>
-        </div>
-        <div className="project-content">
+        <div className="project-card featured">
+          <div className="project-content">
           <p className="project-label">{t('featured_label')}</p>
           <div className="project-header-with-logo">
             <img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/tengra_white.png" alt="Tengra" className="project-logo" />
