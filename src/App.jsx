@@ -292,7 +292,7 @@ function Projects() {
           <div className="project-content">
           <p className="project-label">{t('featured_label')}</p>
           <div className="project-header-with-logo">
-            <img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/tengra_white.png" alt="Tengra" className="project-logo" />
+            <img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/tengra_white_bg_black.png" alt="Tengra" className="project-logo" />
             <h3>Tengra</h3>
           </div>
           <div className="project-description"><p>{t('tengra_desc')}</p></div>
@@ -440,10 +440,7 @@ function Activity() {
               <span className="activity-icon">{icon(item.type)}</span>
               <span className="activity-label">{label(item)}</span>
               {item.type === 'PushEvent' && item.total > 0 && (
-                <span className="activity-count">
-                  <span className="count-pos">+{item.totalAdded || 0}</span>
-                  <span className="count-neg">-{item.totalRemoved || 0}</span>
-                </span>
+                <span className="activity-count">{item.total} commit</span>
               )}
               <span className="activity-time">{item.time}</span>
               <span className="activity-chevron">{openIdx === i ? '▾' : '▸'}</span>
