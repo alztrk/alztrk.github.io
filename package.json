@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "fetch": "node scripts/fetch-stats.mjs",
-    "prebuild": "node scripts/fetch-stats.mjs",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
