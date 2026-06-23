@@ -204,20 +204,9 @@ function About() {
             <p style={{marginTop: 20}}>{t('about_tools')}</p>
           <ul className="skills">
             <li><i className="devicon-vscode-plain colored"></i> VS Code</li>
-            <li><i className="devicon-github-original colored"></i> GitHub Copilot</li>
-            <li>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: 8, verticalAlign: 'middle', color: 'var(--accent)'}}>
-                <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="currentColor" opacity="0.8"/>
-              </svg>
-              Antigravity
-            </li>
-            <li>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: 8, verticalAlign: 'middle', color: 'var(--accent)'}}>
-                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor"/>
-                <path d="M12 6v6l4 2" stroke="currentColor"/>
-              </svg>
-              opencode
-            </li>
+            <li><img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/copilot.svg" alt="" style={{width: 16, height: 16, marginRight: 8, verticalAlign: 'middle'}} /> GitHub Copilot</li>
+            <li><img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/antigravity.svg" alt="" style={{width: 16, height: 16, marginRight: 8, verticalAlign: 'middle'}} /> Antigravity</li>
+            <li><img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/opencode.svg" alt="" style={{width: 16, height: 16, marginRight: 8, verticalAlign: 'middle'}} /> opencode</li>
           </ul>
         </div>
         <div>
@@ -260,12 +249,12 @@ function Contributions() {
         days.push(d.toISOString().split('T')[0]);
       }
       const dayCount = {};
-      events.forEach(e => {
-        if (e.type === 'PushEvent' && e.payload.commits) {
-          const d = e.created_at.split('T')[0];
-          dayCount[d] = (dayCount[d] || 0) + e.payload.commits.length;
-        }
-      });
+        events.forEach(e => {
+          if (e.type === 'PushEvent') {
+            const d = e.created_at.split('T')[0];
+            dayCount[d] = (dayCount[d] || 0) + 1;
+          }
+        });
       const max = Math.max(...Object.values(dayCount), 1);
       const result = days.reverse().map(d => {
         const count = dayCount[d] || 0;
@@ -297,8 +286,14 @@ function Projects() {
   const [xfilterStars, setXfilterStars] = useState('?');
 
   useEffect(() => {
-    fetch('https://api.github.com/repos/TengraStudio/tengra').then(r => r.json()).then(d => { setTengraStars(d.stargazers_count ?? '?'); setTengraForks(d.forks_count ?? '?'); }).catch(() => {});
-    fetch('https://api.github.com/repos/alztrk/xfilter').then(r => r.json()).then(d => { setXfilterStars(d.stargazers_count ?? '?'); }).catch(() => {});
+    Promise.all([
+      fetch('https://api.github.com/repos/TengraStudio/tengra').then(r => r.json()),
+      fetch('https://api.github.com/repos/alztrk/xfilter').then(r => r.json())
+    ]).then(([tengra, xf]) => {
+      if (tengra.stargazers_count !== undefined) setTengraStars(tengra.stargazers_count);
+      if (tengra.forks_count !== undefined) setTengraForks(tengra.forks_count);
+      if (xf.stargazers_count !== undefined) setXfilterStars(xf.stargazers_count);
+    }).catch(() => {});
   }, []);
 
   return (
