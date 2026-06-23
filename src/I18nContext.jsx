@@ -1,7 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { en, tr } from './i18n';
-
-const I18nContext = createContext();
+import { I18nContext } from './i18n-context';
 
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState(() => {
@@ -11,22 +10,17 @@ export function I18nProvider({ children }) {
   });
 
   const texts = lang === 'tr' ? tr : en;
+  const t = useCallback((key) => texts[key] || key, [texts]);
 
   useEffect(() => {
     localStorage.setItem('lang', lang);
     document.documentElement.lang = lang;
     document.title = t('title');
-  }, [lang]);
-
-  const t = (key) => texts[key] || key;
+  }, [lang, t]);
 
   return (
     <I18nContext.Provider value={{ lang, setLang, t }}>
       {children}
     </I18nContext.Provider>
   );
-}
-
-export function useI18n() {
-  return useContext(I18nContext);
 }

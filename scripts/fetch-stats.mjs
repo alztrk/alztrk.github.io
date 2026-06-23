@@ -1,12 +1,8 @@
 import { execSync } from 'child_process';
-import { writeFileSync } from 'fs';
+import { rmSync, writeFileSync } from 'fs';
 
 function run(cmd) {
   return execSync(cmd, { encoding: 'utf-8', shell: true });
-}
-
-function ghApi(url) {
-  return JSON.parse(run(`gh api ${url}`));
 }
 
 function ghApiJq(url, jq) {
@@ -47,6 +43,6 @@ const contribData = ghGraphql(query);
 const cal = contribData?.user?.contributionsCollection?.contributionCalendar;
 if (cal) writeFileSync('src/contribs.json', JSON.stringify(cal));
 
-try { run('rm -f query.json'); } catch {}
+try { rmSync('query.json', { force: true }); } catch {}
 
 console.log('Stats refreshed');

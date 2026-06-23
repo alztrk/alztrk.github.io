@@ -1,19 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useI18n, I18nProvider } from './I18nContext';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { I18nProvider } from './I18nContext';
+import { useI18n } from './useI18n';
 import contribData from './contribs.json';
 import repoStats from './repos.json';
 import userStats from './user.json';
-import eventsData from './events.json';
+import huggingFaceLogo from './assets/huggingface.svg';
 import './App.css';
 
 function ThemeToggle() {
+  const { t } = useI18n();
   const [dark, setDark] = useState(() => localStorage.getItem('theme') !== 'light');
   useEffect(() => {
     document.body.classList.toggle('dark', dark);
     localStorage.setItem('theme', dark ? 'dark' : 'light');
   }, [dark]);
   return (
-    <button className="theme-toggle" onClick={() => setDark(!dark)} aria-label="Toggle theme">
+    <button className="theme-toggle" type="button" onClick={() => setDark(!dark)} aria-label={t('toggle_theme')}>
       {dark ? (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="12" cy="12" r="5"/>
@@ -33,52 +35,14 @@ function ThemeToggle() {
 
 function Hero() {
   const { t } = useI18n();
-  const [text, setText] = useState('');
-
-  const phrases = [
-    t('hero_sub'),
-    t('tw_phrase1'),
-    t('tw_phrase2'),
-    t('tw_phrase3'),
-    t('tw_phrase4'),
-  ];
-  const phraseIdx = useRef(0);
-  const charIdx = useRef(0);
-  const isDeleting = useRef(false);
-
-  useEffect(() => {
-    const fn = () => {
-      const current = phrases[phraseIdx.current];
-      if (!isDeleting.current) {
-        charIdx.current++;
-        setText(current.substring(0, charIdx.current));
-        if (charIdx.current === current.length) {
-          isDeleting.current = true;
-          setTimeout(fn, 2000); return;
-        }
-        setTimeout(fn, 50 + Math.random() * 60);
-      } else {
-        charIdx.current--;
-        setText(current.substring(0, charIdx.current));
-        if (charIdx.current === 0) {
-          isDeleting.current = false;
-          phraseIdx.current = (phraseIdx.current + 1) % phrases.length;
-          setTimeout(fn, 400); return;
-        }
-        setTimeout(fn, 30 + Math.random() * 30);
-      }
-    };
-    const timer = setTimeout(fn, 500);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <section id="hero" className="hero">
       <div className="container">
         <div className="hero-content">
           <p className="hero-label">{t('hero_label')}</p>
           <h1><span className="gradient-text">Alican Öztürk</span></h1>
-          <h2>{text}<span className="tw-cursor">|</span></h2>
+          <p className="hero-kicker">{t('hero_kicker')}</p>
+          <p className="hero-role">{t('hero_sub')}</p>
           <p className="hero-desc">{t('hero_desc')}</p>
           <div className="hero-stats">
             <div className="hero-stat">
@@ -106,13 +70,15 @@ function Hero() {
 
 function Navbar() {
   const { t, lang, setLang } = useI18n();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [active, setActive] = useState('hero');
-  const ref = useRef();
+  const langRef = useRef();
+  const mobileMenuId = 'mobile-nav-menu';
 
   useEffect(() => {
     function handleClick(e) {
-      if (ref.current && !ref.current.contains(e.target)) setMenuOpen(false);
+      if (langRef.current && !langRef.current.contains(e.target)) setLangMenuOpen(false);
     }
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
@@ -129,6 +95,10 @@ function Navbar() {
     return () => ob.disconnect();
   }, []);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [lang]);
+
   const links = [
     { id: 'about', label: t('nav_about') },
     { id: 'projects', label: t('nav_work') },
@@ -141,29 +111,71 @@ function Navbar() {
       <div className="container">
         <nav>
           <a href="#" className="logo">&lt;alztrk /&gt;</a>
+          <button
+            className={`mobile-menu-toggle${mobileMenuOpen ? ' open' : ''}`}
+            type="button"
+            aria-label={mobileMenuOpen ? t('close_menu') : t('open_menu')}
+            aria-expanded={mobileMenuOpen}
+            aria-controls={mobileMenuId}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
           <div className="nav-links">
             {links.map(l => (
               <a key={l.id} href={'#' + l.id} className={active === l.id ? 'active' : ''}>{l.label}</a>
             ))}
           </div>
           <div className="nav-actions">
-            <div className="lang-dropdown" ref={ref}>
-              <button className="lang-btn" onClick={() => setMenuOpen(!menuOpen)}>
+            <div className="lang-dropdown" ref={langRef}>
+              <button className="lang-btn" type="button" onClick={() => setLangMenuOpen(!langMenuOpen)}>
                 {lang.toUpperCase()} ▾
               </button>
-              {menuOpen && (
-                <div className="lang-menu">
-                  <button className={'lang-option' + (lang === 'en' ? ' active' : '')} onClick={() => { setLang('en'); setMenuOpen(false); }}>EN</button>
-                  <button className={'lang-option' + (lang === 'tr' ? ' active' : '')} onClick={() => { setLang('tr'); setMenuOpen(false); }}>TR</button>
+              {langMenuOpen && (
+                <div className="lang-menu open">
+                  <button className={'lang-option' + (lang === 'en' ? ' active' : '')} type="button" onClick={() => { setLang('en'); setLangMenuOpen(false); }}>EN</button>
+                  <button className={'lang-option' + (lang === 'tr' ? ' active' : '')} type="button" onClick={() => { setLang('tr'); setLangMenuOpen(false); }}>TR</button>
                 </div>
               )}
             </div>
-            <span className="hireable-badge">{t('available')}</span>
             <ThemeToggle />
           </div>
         </nav>
+        <div id={mobileMenuId} className={`mobile-menu${mobileMenuOpen ? ' open' : ''}`}>
+          {links.map(l => (
+            <a
+              key={l.id}
+              href={'#' + l.id}
+              className={active === l.id ? 'active' : ''}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {l.label}
+            </a>
+          ))}
+        </div>
       </div>
     </header>
+  );
+}
+
+function CopilotIcon() {
+  return (
+    <svg className="tool-logo tool-logo-copilot" viewBox="0 0 24 24" aria-hidden="true">
+      <defs>
+        <linearGradient id="copilotGradient" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#8534F3" />
+          <stop offset="0.5" stopColor="#C898FD" />
+          <stop offset="1" stopColor="#F97316" />
+        </linearGradient>
+      </defs>
+      <rect x="3" y="3" width="18" height="18" rx="6" fill="url(#copilotGradient)" />
+      <path d="M8.5 14.5c0-2.5 1.6-4.5 3.5-4.5s3.5 2 3.5 4.5" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="10" cy="10" r="1.2" fill="#fff" />
+      <circle cx="14" cy="10" r="1.2" fill="#fff" />
+      <path d="M9.5 15.5c.7.7 1.6 1 2.5 1s1.8-.3 2.5-1" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
   );
 }
 
@@ -199,7 +211,8 @@ function About() {
         <div className="about-text">
           <p>{t('about_p1')}</p>
           <p>{t('about_p2')}</p>
-          <p>{t('about_techs')}</p>
+          <div className="about-group">
+          <p className="about-group-label">{t('about_techs')}</p>
           <ul className="skills">
             <li><i className="devicon-typescript-plain colored"></i> TypeScript</li>
             <li><i className="devicon-react-original colored"></i> React Native</li>
@@ -210,13 +223,16 @@ function About() {
             <li><i className="devicon-html5-plain colored"></i> HTML & CSS</li>
             <li><i className="devicon-github-original colored"></i> Git & CI/CD</li>
           </ul>
-          <p style={{marginTop: 20}}>{t('about_tools')}</p>
+          </div>
+          <div className="about-group">
+          <p className="about-group-label">{t('about_tools')}</p>
           <ul className="skills">
             <li><i className="devicon-vscode-plain colored"></i> VS Code</li>
-            <li><img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/copilot.svg" alt="" style={{width: 16, height: 16, marginRight: 8, verticalAlign: 'middle'}} /> GitHub Copilot</li>
+            <li><CopilotIcon /> GitHub Copilot</li>
             <li><img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/antigravity.svg" alt="" style={{width: 16, height: 16, marginRight: 8, verticalAlign: 'middle'}} /> Antigravity</li>
             <li><img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/opencode.svg" alt="" style={{width: 16, height: 16, marginRight: 8, verticalAlign: 'middle'}} /> opencode</li>
           </ul>
+          </div>
         </div>
         <div className="avatar-col">
           <div className="avatar-frame">
@@ -228,77 +244,34 @@ function About() {
   );
 }
 
-function ContributionChart() {
-  const canvasRef = useRef();
-  const weeks = contribData.weeks || [];
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !weeks.length) return;
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    ctx.scale(dpr, dpr);
-
-    const days = weeks.flatMap(w => w.contributionDays);
-    const max = Math.max(1, ...days.map(d => d.contributionCount));
-    const pad = { t: 10, r: 10, b: 20, l: 30 };
-    const cw = w - pad.l - pad.r;
-    const ch = h - pad.t - pad.b;
-
-    ctx.clearRect(0, 0, w, h);
-    const isDark = document.body.classList.contains('dark');
-    const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-    const textColor = isDark ? '#8a8a9a' : '#4a4a5a';
-    const barColor = isDark ? '#22c55e' : '#16a34a';
-    const barHover = isDark ? '#2ee075' : '#1db85a';
-
-    // Grid lines
-    ctx.strokeStyle = gridColor;
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= 4; i++) {
-      const y = pad.t + (ch / 4) * i;
-      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
-      ctx.fillStyle = textColor;
-      ctx.font = '10px Inter';
-      ctx.textAlign = 'right';
-      ctx.fillText(Math.round(max - (max / 4) * i), pad.l - 6, y + 4);
-    }
-
-    // Bars
-    const barW = cw / days.length - 1;
-    days.forEach((d, i) => {
-      const x = pad.l + (cw / days.length) * i;
-      const barH = (d.contributionCount / max) * ch;
-      const y = pad.t + ch - barH;
-      ctx.fillStyle = barColor;
-      ctx.fillRect(x, y, Math.max(barW, 2), Math.max(barH, 1));
-    });
-
-    // Month labels
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    let lastM = -1;
-    days.forEach((d, i) => {
-      const m = new Date(d.date).getMonth();
-      if (m !== lastM) {
-        lastM = m;
-        ctx.fillStyle = textColor;
-        ctx.font = '9px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText(months[m], pad.l + (cw / days.length) * i, h - 2);
-      }
-    });
-  }, [weeks]);
-
-  return <canvas ref={canvasRef} style={{width: '100%', height: 160, borderRadius: 8}} />;
+function LeetCodeIcon({ className = '' }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.938 5.938 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114c1.058-1.134 3.204-1.27 4.43-.278l3.501 2.831c.593.48 1.461.387 1.94-.207a1.384 1.384 0 0 0-.207-1.943l-3.5-2.831c-.8-.647-1.766-1.045-2.774-1.202l2.015-2.158A1.384 1.384 0 0 0 13.483 0Z"
+        fill="#FFA116"
+      />
+      <path d="M10.617 12.815H20.79a1.38 1.38 0 0 1 0 2.764H10.617a1.38 1.38 0 0 1 0-2.764Z" fill="currentColor" />
+    </svg>
+  );
 }
 
 function Stats() {
   const { t } = useI18n();
-  const weeks = contribData.weeks || [];
+  const weeks = useMemo(() => contribData.weeks || [], []);
+  const total = contribData.totalContributions || 0;
+  const allDays = weeks.flatMap(w => w.contributionDays);
+  const activeDays = allDays.filter(d => d.contributionCount > 0).length;
+  const activeWeeks = weeks.filter((week) => week.contributionDays.some((day) => day.contributionCount > 0)).length;
+  const streakRatio = allDays.length ? Math.round((activeDays / allDays.length) * 100) : 0;
+  const busiestDay = allDays.reduce(
+    (best, day) => (day.contributionCount > best.contributionCount ? day : best),
+    { contributionCount: 0, date: '' }
+  );
+  const monthFormatter = useMemo(
+    () => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }),
+    []
+  );
 
   const cells = [];
   const maxCount = Math.max(1, ...weeks.flatMap(w => w.contributionDays.map(d => d.contributionCount)));
@@ -309,20 +282,50 @@ function Stats() {
 
   return (
     <Section id="stats" num="02" title={t('stats_title')}>
+      <div className="stats-highlights">
+        <div className="stats-highlight-card">
+          <span className="stats-highlight-value">{total}</span>
+          <span className="stats-highlight-label">{t('stats_total_contribs')}</span>
+        </div>
+        <div className="stats-highlight-card">
+          <span className="stats-highlight-value">{activeDays}</span>
+          <span className="stats-highlight-label">{t('stats_active_days')}</span>
+        </div>
+        <div className="stats-highlight-card">
+          <span className="stats-highlight-value">{busiestDay.contributionCount}</span>
+          <span className="stats-highlight-label">{t('stats_best_day')}</span>
+        </div>
+      </div>
+
       <div className="stats-block">
         <p className="stats-block-title">{t('stats_contribs')}</p>
-        <ContributionChart />
-        <div className="contrib-grid">
+        <div className="stats-inline-strip">
+          <div className="stats-inline-metric">
+            <span className="stats-inline-value">{activeWeeks}</span>
+            <span className="stats-inline-label">{t('stats_active_weeks')}</span>
+          </div>
+          <div className="stats-inline-metric">
+            <span className="stats-inline-value">%{streakRatio}</span>
+            <span className="stats-inline-label">{t('stats_consistency_rate')}</span>
+          </div>
+          <div className="stats-inline-metric">
+            <span className="stats-inline-value">
+              {busiestDay.date ? monthFormatter.format(new Date(busiestDay.date)) : '-'}
+            </span>
+            <span className="stats-inline-label">{t('stats_peak_date')}</span>
+          </div>
+        </div>
+        <div className="contrib-grid" aria-hidden="true">
           {cells.map((c, i) => (
             <div key={i} className={`contrib-cell${c.level > 0 ? ' l' + c.level : ''}`} title={c.date + ': ' + c.count + ' commits'} />
           ))}
         </div>
-        <p className="stats-summary">{contribData.totalContributions} {t('contrib_total')} {t('stats_in_year')}</p>
+        <p className="stats-summary">{total} {t('contrib_total')}</p>
       </div>
 
       <div className="stats-block">
-        <p className="stats-block-title">{t('stats_activity')}</p>
-        <ActivityChart />
+        <p className="stats-block-title">{t('recent_commits_title')}</p>
+        <RecentCommits />
       </div>
     </Section>
   );
@@ -333,6 +336,32 @@ function Projects() {
   const tengraStars = repoStats[0]?.stars ?? '?';
   const tengraForks = repoStats[0]?.forks ?? '?';
   const xfilterStars = repoStats[1]?.stars ?? '?';
+  const projects = [
+    {
+      title: 'XFilter',
+      desc: t('xfilter_desc'),
+      tech: ['JavaScript', 'Chrome API'],
+      metric: xfilterStars,
+      metricLabel: t('project_stars'),
+      href: 'https://github.com/alztrk/xfilter',
+    },
+    {
+      title: 'Tengra Marketplace',
+      desc: t('market_desc'),
+      tech: ['JavaScript', 'GitHub Actions', 'JSON'],
+      metric: t('project_live_registry'),
+      metricLabel: t('project_role'),
+      href: 'https://github.com/TengraStudio/tengra-market',
+    },
+    {
+      title: 'Job Finder Plugin',
+      desc: t('jobfinder_desc'),
+      tech: ['TypeScript', 'AI', 'Plugin SDK'],
+      metric: t('project_ai_plugin'),
+      metricLabel: t('project_role'),
+      href: 'https://github.com/TengraStudio/job-finder-plugin',
+    },
+  ];
 
   return (
     <Section id="projects" num="03" title={t('projects_title')}>
@@ -356,126 +385,130 @@ function Projects() {
             </span>
           </div>
           <div className="project-links">
-            <a href="https://github.com/TengraStudio/tengra" target="_blank" aria-label="GitHub">
+            <a href="https://github.com/TengraStudio/tengra" target="_blank" rel="noreferrer" aria-label="GitHub">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
             </a>
-            <a href="https://github.com/TengraStudio/tengra/releases" target="_blank" className="btn-link">{t('download')}</a>
+            <a href="https://github.com/TengraStudio/tengra/releases" target="_blank" rel="noreferrer" className="btn-link">{t('download')}</a>
           </div>
         </div>
       </div>
 
       <div className="project-grid">
-          <div className="project-card">
+        {projects.map((project) => (
+          <article key={project.title} className="project-card project-card-secondary">
             <div className="project-content">
-              <h3>XFilter</h3>
-            <p>{t('xfilter_desc')}</p>
-            <div className="project-tech"><span>JavaScript</span><span>Chrome API</span></div>
-            <div className="project-meta">
-              <span className="project-meta-item">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <span>{xfilterStars}</span>
-              </span>
+              <div className="project-card-topline">
+                <span className="project-mini-label">{project.metricLabel}</span>
+                <span className="project-mini-metric">{project.metric}</span>
+              </div>
+              <h3>{project.title}</h3>
+              <p>{project.desc}</p>
+              <div className="project-tech">{project.tech.map((item) => <span key={item}>{item}</span>)}</div>
+              <div className="project-links">
+                <a href={project.href} target="_blank" rel="noreferrer" aria-label={`${project.title} GitHub`}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                </a>
+                <a href={project.href} target="_blank" rel="noreferrer" className="btn-link">{t('project_open')}</a>
+              </div>
             </div>
-            <div className="project-links">
-              <a href="https://github.com/alztrk/xfilter" target="_blank" aria-label="GitHub">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-              </a>
-            </div>
-          </div>
-        </div>
-
-          <div className="project-card">
-            <div className="project-content">
-              <h3>Tengra Marketplace</h3>
-            <p>{t('market_desc')}</p>
-            <div className="project-tech"><span>JavaScript</span><span>GitHub Actions</span><span>JSON</span></div>
-            <div className="project-links">
-              <a href="https://github.com/TengraStudio/tengra-market" target="_blank" aria-label="GitHub">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-              </a>
-            </div>
-          </div>
-        </div>
-
-          <div className="project-card">
-            <div className="project-content">
-              <h3>Job Finder Plugin</h3>
-            <p>{t('jobfinder_desc')}</p>
-            <div className="project-tech"><span>TypeScript</span><span>AI</span><span>Plugin SDK</span></div>
-            <div className="project-links">
-              <a href="https://github.com/TengraStudio/job-finder-plugin" target="_blank" aria-label="GitHub">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-              </a>
-            </div>
-          </div>
-        </div>
+          </article>
+        ))}
       </div>
     </Section>
   );
 }
 
-function ActivityChart() {
-  const canvasRef = useRef();
-  const rawEvents = eventsData || [];
+function RecentCommits() {
+  const { t, lang } = useI18n();
+  const [commits, setCommits] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !rawEvents.length) return;
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    ctx.scale(dpr, dpr);
+    let cancelled = false;
 
-    const isDark = document.body.classList.contains('dark');
-    const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-    const textColor = isDark ? '#8a8a9a' : '#4a4a5a';
-    const colors = { PushEvent: '#22c55e', CreateEvent: '#06b6d4', WatchEvent: '#eab308' };
-    const pad = { t: 10, r: 10, b: 20, l: 40 };
-    const cw = w - pad.l - pad.r;
-    const ch = h - pad.t - pad.b;
+    async function loadCommits() {
+      try {
+        const eventsResponse = await fetch('https://api.github.com/users/alztrk/events/public?per_page=100');
+        const events = await eventsResponse.json();
+        const pushEvents = (Array.isArray(events) ? events : [])
+          .filter((event) => event.type === 'PushEvent' && event.repo?.name && event.payload?.head)
+          .slice(0, 10);
 
-    const typeCount = {};
-    rawEvents.forEach(e => { typeCount[e.type] = (typeCount[e.type] || 0) + 1; });
-    const types = Object.keys(typeCount);
-    const max = Math.max(1, ...Object.values(typeCount));
-    const barW = Math.min((cw - (types.length - 1) * 8) / types.length, 60);
+        const commitResults = await Promise.all(
+          pushEvents.map(async (event) => {
+            const repo = event.repo.name;
+            const sha = event.payload.head;
+            const branch = event.payload.ref?.replace('refs/heads/', '') || 'main';
+            const commitResponse = await fetch(`https://api.github.com/repos/${repo}/commits/${sha}`);
+            const commitData = await commitResponse.json();
+            const message = commitData.commit?.message || t('recent_commits_fallback');
+            const [title, ...rest] = message.split('\n');
 
-    ctx.clearRect(0, 0, w, h);
+            return {
+              sha,
+              shortSha: sha.slice(0, 7),
+              repo,
+              branch,
+              title,
+              body: rest.join(' ').trim(),
+              url: commitData.html_url || `https://github.com/${repo}/commit/${sha}`,
+              date: commitData.commit?.author?.date || event.created_at,
+            };
+          })
+        );
 
-    // Grid
-    ctx.strokeStyle = gridColor;
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= 4; i++) {
-      const y = pad.t + (ch / 4) * i;
-      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
-      ctx.fillStyle = textColor;
-      ctx.font = '10px Inter';
-      ctx.textAlign = 'right';
-      ctx.fillText(Math.round(max - (max / 4) * i), pad.l - 6, y + 4);
+        if (!cancelled) setCommits(commitResults);
+      } catch {
+        if (!cancelled) setCommits([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
 
-    // Bars
-    const labels = { PushEvent: 'Push', CreateEvent: 'Create', WatchEvent: 'Star' };
-    types.forEach((type, i) => {
-      const x = pad.l + (cw - types.length * barW - (types.length - 1) * 8) / 2 + i * (barW + 8);
-      const barH = (typeCount[type] / max) * ch;
-      const y = pad.t + ch - barH;
-      ctx.fillStyle = colors[type] || '#888';
-      ctx.beginPath();
-      ctx.roundRect(x, y, barW, Math.max(barH, 2), 4);
-      ctx.fill();
-      ctx.fillStyle = textColor;
-      ctx.font = '10px Inter';
-      ctx.textAlign = 'center';
-      ctx.fillText(labels[type] || type, x + barW / 2, h - 4);
-      ctx.fillText(typeCount[type], x + barW / 2, y - 6);
-    });
-  }, [rawEvents]);
+    loadCommits();
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
 
-  return <canvas ref={canvasRef} style={{width: '100%', height: 180, borderRadius: 8}} />;
+  const formatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(lang === 'tr' ? 'tr-TR' : 'en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    [lang]
+  );
+
+  if (loading) {
+    return <p className="activity-empty">{t('loading')}</p>;
+  }
+
+  if (!commits.length) {
+    return <p className="activity-empty">{t('activity_empty')}</p>;
+  }
+
+  return (
+    <div className="commit-list">
+      {commits.map((commit, index) => (
+        <a key={`${commit.sha}-${index}`} href={commit.url} target="_blank" rel="noreferrer" className="commit-card">
+          <div className="commit-card-head">
+            <span className="commit-repo">{commit.repo}</span>
+            <span className="commit-sha">{commit.shortSha}</span>
+          </div>
+          <p className="commit-title">{commit.title}</p>
+          {commit.body ? <p className="commit-body">{commit.body}</p> : null}
+          <div className="commit-meta">
+            <span>{commit.branch}</span>
+            <span>{formatter.format(new Date(commit.date))}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  );
 }
 
 function Writing() {
@@ -484,12 +517,13 @@ function Writing() {
 
   useEffect(() => {
     fetch('https://alfa-leetcode-api.onrender.com/alz_trk').then(r => r.json()).then(d => {
-      if (d.ranking) setLcData({ rank: '#' + d.ranking.toLocaleString(), solved: 'active' });
+      if (d.ranking) setLcData({ rank: '#' + d.ranking.toLocaleString(), solved: t('lc_active_label') });
     }).catch(() => {});
-  }, []);
+  }, [t]);
 
   return (
     <Section id="posts" num="04" title={t('posts_title')}>
+      <p className="section-intro">{t('posts_intro')}</p>
       <div className="writing-grid">
         <a href="https://twitter.com/alz_trk" target="_blank" className="writing-card" rel="noreferrer">
           <div className="writing-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
@@ -503,8 +537,14 @@ function Writing() {
           <p>{t('github_desc')}</p>
           <span className="writing-link">alztrk</span>
         </a>
+        <a href="https://huggingface.co/alztrk" target="_blank" className="writing-card" rel="noreferrer">
+          <div className="writing-icon brand-icon-wrap"><img src={huggingFaceLogo} alt="" className="brand-icon brand-icon-hf" /></div>
+          <h3>Hugging Face</h3>
+          <p>{t('huggingface_desc')}</p>
+          <span className="writing-link">alztrk</span>
+        </a>
         <a href="https://leetcode.com/u/alz_trk/" target="_blank" className="writing-card" rel="noreferrer">
-          <div className="writing-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M13.483 0a1.374 1.374 0 00-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 00-1.209 2.104 5.35 5.35 0 00-.125.513 5.527 5.527 0 00.062 2.362 5.83 5.83 0 00.349 1.017 5.938 5.938 0 001.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 00-1.951-.003l-2.396 2.392a3.021 3.021 0 01-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.47-.948-2.263a2.68 2.68 0 01.066-.523 2.545 2.545 0 01.619-1.164L9.13 8.114c1.058-1.134 3.204-1.027 4.43.174l1.5 1.453c.54.54 1.414.54 1.955 0s.54-1.414 0-1.955L15.578 6.34c-.615-.602-1.33-1.003-2.095-1.203a5.442 5.442 0 00-1.007-.136c-.288-.012-.613 0-.613 0l3.394-3.394A1.378 1.378 0 0013.483 0zm-3.705 7.302h.004c.476.002.942.148 1.304.479l4.422 4.353c.541.54.541 1.414.003 1.955a1.378 1.378 0 01-1.952.003l-4.422-4.353a1.45 1.45 0 01-.005-2.038 1.38 1.38 0 011.024-.418l.622-.38z"/></svg></div>
+          <div className="writing-icon brand-icon-wrap"><LeetCodeIcon className="brand-icon brand-icon-lc" /></div>
           <h3>LeetCode</h3>
           <p>{t('leetcode_desc')}</p>
           <div className="leetcode-stats">
@@ -524,7 +564,7 @@ function Contact() {
     <Section id="contact" num="05" title={t('contact_title')} className="centered">
       <div className="contact-content">
         <p>{t('contact_desc')}</p>
-        <a href="https://twitter.com/alz_trk" className="btn btn-primary">{t('contact_btn')}</a>
+        <a href="https://twitter.com/alz_trk" target="_blank" rel="noreferrer" className="btn btn-primary">{t('contact_btn')}</a>
       </div>
     </Section>
   );
@@ -548,29 +588,22 @@ function Footer() {
           <a href="https://linkedin.com/in/alz-trk" target="_blank" rel="noreferrer" aria-label="LinkedIn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
           </a>
+          <a href="https://huggingface.co/alztrk" target="_blank" rel="noreferrer" aria-label="Hugging Face">
+            <img src={huggingFaceLogo} alt="" className="footer-brand-icon footer-brand-icon-hf" />
+          </a>
           <a href="https://leetcode.com/u/alz_trk/" target="_blank" rel="noreferrer" aria-label="LeetCode">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13.483 0a1.374 1.374 0 00-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 00-1.209 2.104 5.35 5.35 0 00-.125.513 5.527 5.527 0 00.062 2.362 5.83 5.83 0 00.349 1.017 5.938 5.938 0 001.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 00-1.951-.003l-2.396 2.392a3.021 3.021 0 01-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.47-.948-2.263a2.68 2.68 0 01.066-.523 2.545 2.545 0 01.619-1.164L9.13 8.114c1.058-1.134 3.204-1.027 4.43.174l1.5 1.453c.54.54 1.414.54 1.955 0s.54-1.414 0-1.955L15.578 6.34c-.615-.602-1.33-1.003-2.095-1.203a5.442 5.442 0 00-1.007-.136c-.288-.012-.613 0-.613 0l3.394-3.394A1.378 1.378 0 0013.483 0zm-3.705 7.302h.004c.476.002.942.148 1.304.479l4.422 4.353c.541.54.541 1.414.003 1.955a1.378 1.378 0 01-1.952.003l-4.422-4.353a1.45 1.45 0 01-.005-2.038 1.38 1.38 0 011.024-.418l.622-.38z"/></svg>
+            <LeetCodeIcon className="footer-brand-icon footer-brand-icon-lc" />
           </a>
         </div>
-        <p className="footer-text">{t('footer_made')} Alican Öztürk <span className="visitor-count">&middot; <VisitorCount /> {t('visitors')}</span></p>
+        <p className="footer-text">{t('footer_made')}</p>
       </div>
     </footer>
   );
 }
 
-function VisitorCount() {
-  const [count] = useState(() => {
-    const c = parseInt(localStorage.getItem('visitor_count') || '0') + 1;
-    localStorage.setItem('visitor_count', c);
-    return c;
-  });
-  return <span id="visitor-count">{count}</span>;
-}
-
 export default function App() {
   return (
     <I18nProvider>
-      <div className="cursor" id="cursor" />
       <Navbar />
       <main>
         <Hero />
@@ -588,7 +621,6 @@ export default function App() {
       <Footer />
       <ProgressBar />
       <BackToTop />
-      <Particles />
     </I18nProvider>
   );
 }
@@ -596,9 +628,17 @@ export default function App() {
 function ProgressBar() {
   const [width, setWidth] = useState(0);
   useEffect(() => {
-    const fn = () => setWidth(window.scrollY / (document.documentElement.scrollHeight - window.innerHeight));
+    const fn = () => {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      setWidth(scrollable > 0 ? window.scrollY / scrollable : 0);
+    };
+    fn();
     window.addEventListener('scroll', fn);
-    return () => window.removeEventListener('scroll', fn);
+    window.addEventListener('resize', fn);
+    return () => {
+      window.removeEventListener('scroll', fn);
+      window.removeEventListener('resize', fn);
+    };
   }, []);
   return <div id="progress-bar" style={{ transform: `scaleX(${width})` }} />;
 }
@@ -617,72 +657,3 @@ function BackToTop() {
   );
 }
 
-function Particles() {
-  const canvasRef = useRef();
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    const colors = ['#22c55e', '#06b6d4', '#10b981'];
-
-    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-    resize();
-    window.addEventListener('resize', resize);
-
-    class Particle {
-      constructor() { this.reset(); }
-      reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 3 + 1;
-        this.speedX = (Math.random() - 0.5) * 0.5;
-        this.speedY = (Math.random() - 0.5) * 0.5;
-        this.color = colors[Math.floor(Math.random() * colors.length)];
-        this.alpha = Math.random() * 0.5 + 0.1;
-      }
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = this.alpha;
-        ctx.fill();
-      }
-    }
-
-    for (let i = 0; i < 60; i++) particles.push(new Particle());
-
-    let id;
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => { p.update(); p.draw(); });
-      particles.forEach((a, i) => {
-        for (let j = i + 1; j < particles.length; j++) {
-          const b = particles[j];
-          const dx = a.x - b.x, dy = a.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = a.color;
-            ctx.globalAlpha = (1 - dist / 150) * 0.15;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-      });
-      id = requestAnimationFrame(animate);
-    }
-    animate();
-
-    return () => { cancelAnimationFrame(id); window.removeEventListener('resize', resize); };
-  }, []);
-
-  return <canvas ref={canvasRef} id="particles" />;
-}
