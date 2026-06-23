@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useI18n, I18nProvider } from './I18nContext';
 import contribData from './contribs.json';
 import eventsData from './events.json';
+import repoStats from './repos.json';
 import './App.css';
 
 function ThemeToggle() {
@@ -301,9 +302,12 @@ function ContributionChart() {
   return <canvas ref={canvasRef} style={{width: '100%', height: 160, borderRadius: 8}} />;
 }
 
-function Contributions() {
+function Stats() {
   const { t } = useI18n();
+  const [openIdx, setOpenIdx] = useState(null);
+  const rawEvents = eventsData || [];
   const weeks = contribData.weeks || [];
+
   const cells = [];
   const maxCount = Math.max(1, ...weeks.flatMap(w => w.contributionDays.map(d => d.contributionCount)));
   weeks.forEach(w => w.contributionDays.forEach(d => {
@@ -311,13 +315,51 @@ function Contributions() {
     cells.push({ date: d.date, count: d.contributionCount, level });
   }));
 
+  const items = rawEvents.map(e => {
+    const ago = Math.floor((Date.now() - new Date(e.created_at).getTime()) / 3600000);
+    const time = ago < 1 ? t('act_just') : ago < 24 ? ago + t('act_h') : Math.floor(ago / 24) + t('act_d');
+    return { id: e.id, type: e.type, repo: e.repo, time };
+  });
+
+  const icon = (type) => {
+    switch (type) {
+      case 'PushEvent': return <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75v7.19l1.72-1.72a.75.75 0 111.06 1.06l-3 3a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06L7.25 9.44V2.25A.75.75 0 018 1.5zM2.5 12.5a.75.75 0 00-1.5 0v1a1.75 1.75 0 001.75 1.75h10.5A1.75 1.75 0 0015 13.5v-1a.75.75 0 00-1.5 0v1a.25.25 0 01-.25.25H3.75a.25.25 0 01-.25-.25v-1z"/></svg>;
+      case 'CreateEvent': return <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75V7h4.75a.75.75 0 010 1.5H8.75v4.75a.75.75 0 01-1.5 0V8.5H2.5a.75.75 0 010-1.5h4.75V2.25A.75.75 0 018 1.5z"/></svg>;
+      case 'WatchEvent': return <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2.5a5.5 5.5 0 00-5.5 5.5A5.5 5.5 0 008 13.5 5.5 5.5 0 0013.5 8 5.5 5.5 0 008 2.5zM8 1a7 7 0 100 14A7 7 0 008 1zm0 4a3 3 0 100 6 3 3 0 000-6z"/></svg>;
+      default: return null;
+    }
+  };
+
+  const label = (item) => {
+    switch (item.type) {
+      case 'PushEvent': return t('act_push') + ' ' + item.repo;
+      case 'CreateEvent': return t('act_create') + ' ' + t('act_in') + ' ' + item.repo;
+      case 'WatchEvent': return t('act_star');
+      default: return item.type + ' ' + t('act_in') + ' ' + item.repo;
+    }
+  };
+
   return (
-    <Section id="contrib" num="02" title={t('contrib_title')}>
+    <Section id="stats" num="02" title={t('stats_title')}>
       <p className="contrib-label">{t('contrib_desc')} &middot; {contribData.totalContributions} {t('contrib_total')}</p>
       <ContributionChart />
       <div className="contrib-grid">
         {cells.map((c, i) => (
           <div key={i} className={`contrib-cell${c.level > 0 ? ' l' + c.level : ''}`} title={c.date + ': ' + c.count + ' commits'} />
+        ))}
+      </div>
+      <div style={{marginTop: 32}}>
+        <ActivityChart />
+      </div>
+      <div className="activity-feed" style={{marginTop: 16}}>
+        {items.map((item, i) => (
+          <div key={item.id} className="activity-item">
+            <div className="activity-header" onClick={() => setOpenIdx(openIdx === i ? null : i)}>
+              <span className="activity-icon">{icon(item.type)}</span>
+              <span className="activity-label">{label(item)}</span>
+              <span className="activity-time">{item.time}</span>
+            </div>
+          </div>
         ))}
       </div>
     </Section>
@@ -326,20 +368,9 @@ function Contributions() {
 
 function Projects() {
   const { t } = useI18n();
-  const [tengraStars, setTengraStars] = useState('?');
-  const [tengraForks, setTengraForks] = useState('?');
-  const [xfilterStars, setXfilterStars] = useState('?');
-
-  useEffect(() => {
-    Promise.all([
-      fetch('https://api.github.com/repos/TengraStudio/tengra').then(r => r.json()),
-      fetch('https://api.github.com/repos/alztrk/xfilter').then(r => r.json())
-    ]).then(([tengra, xf]) => {
-      if (tengra.stargazers_count !== undefined) setTengraStars(tengra.stargazers_count);
-      if (tengra.forks_count !== undefined) setTengraForks(tengra.forks_count);
-      if (xf.stargazers_count !== undefined) setXfilterStars(xf.stargazers_count);
-    }).catch(() => {});
-  }, []);
+  const tengraStars = repoStats[0]?.stars ?? '?';
+  const tengraForks = repoStats[0]?.forks ?? '?';
+  const xfilterStars = repoStats[1]?.stars ?? '?';
 
   return (
     <Section id="projects" num="03" title={t('projects_title')}>
@@ -485,54 +516,6 @@ function ActivityChart() {
   return <canvas ref={canvasRef} style={{width: '100%', height: 180, borderRadius: 8}} />;
 }
 
-function Activity() {
-  const { t } = useI18n();
-  const [openIdx, setOpenIdx] = useState(null);
-  const rawEvents = eventsData || [];
-  const items = rawEvents.map(e => {
-    const ago = Math.floor((Date.now() - new Date(e.created_at).getTime()) / 3600000);
-    const time = ago < 1 ? t('act_just') : ago < 24 ? ago + t('act_h') : Math.floor(ago / 24) + t('act_d');
-    return { id: e.id, type: e.type, repo: e.repo, time };
-  });
-
-  const icon = (type) => {
-    switch (type) {
-      case 'PushEvent': return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75v7.19l1.72-1.72a.75.75 0 111.06 1.06l-3 3a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06L7.25 9.44V2.25A.75.75 0 018 1.5zM2.5 12.5a.75.75 0 00-1.5 0v1a1.75 1.75 0 001.75 1.75h10.5A1.75 1.75 0 0015 13.5v-1a.75.75 0 00-1.5 0v1a.25.25 0 01-.25.25H3.75a.25.25 0 01-.25-.25v-1z"/></svg>;
-      case 'CreateEvent': return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75V7h4.75a.75.75 0 010 1.5H8.75v4.75a.75.75 0 01-1.5 0V8.5H2.5a.75.75 0 010-1.5h4.75V2.25A.75.75 0 018 1.5z"/></svg>;
-      case 'WatchEvent': return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2.5a5.5 5.5 0 00-5.5 5.5A5.5 5.5 0 008 13.5 5.5 5.5 0 0013.5 8 5.5 5.5 0 008 2.5zM8 1a7 7 0 100 14A7 7 0 008 1zm0 4a3 3 0 100 6 3 3 0 000-6z"/></svg>;
-      default: return null;
-    }
-  };
-
-  const label = (item) => {
-    switch (item.type) {
-      case 'PushEvent': return t('act_push') + ' ' + item.repo;
-      case 'CreateEvent': return t('act_create') + ' ' + t('act_in') + ' ' + item.repo;
-      case 'WatchEvent': return t('act_star');
-      default: return item.type + ' ' + t('act_in') + ' ' + item.repo;
-    }
-  };
-
-  return (
-    <Section id="activity" num="04" title={t('activity_title')}>
-      <ActivityChart />
-      <div className="activity-feed" style={{marginTop: 24}}>
-        {items.length === 0 ? <p className="activity-empty">{t('activity_empty')}</p> :
-         items.map((item, i) => (
-          <div key={item.id} className="activity-item">
-            <div className="activity-header" onClick={() => setOpenIdx(openIdx === i ? null : i)}>
-              <span className="activity-icon">{icon(item.type)}</span>
-              <span className="activity-label">{label(item)}</span>
-              <span className="activity-time">{item.time}</span>
-              <span className="activity-chevron">{openIdx === i ? '▾' : '▸'}</span>
-            </div>
-          </div>
-         ))}
-      </div>
-    </Section>
-  );
-}
-
 function Writing() {
   const { t } = useI18n();
   const [lcData, setLcData] = useState({ rank: '-', solved: '-' });
@@ -544,7 +527,7 @@ function Writing() {
   }, []);
 
   return (
-    <Section id="posts" num="05" title={t('posts_title')}>
+    <Section id="posts" num="04" title={t('posts_title')}>
       <div className="writing-grid">
         <a href="https://twitter.com/alz_trk" target="_blank" className="writing-card" rel="noreferrer">
           <div className="writing-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
@@ -576,7 +559,7 @@ function Writing() {
 function Contact() {
   const { t } = useI18n();
   return (
-    <Section id="contact" num="06" title={t('contact_title')} className="centered">
+    <Section id="contact" num="05" title={t('contact_title')} className="centered">
       <div className="contact-content">
         <p>{t('contact_desc')}</p>
         <a href="https://twitter.com/alz_trk" className="btn btn-primary">{t('contact_btn')}</a>
@@ -632,7 +615,7 @@ export default function App() {
         <div className="section-divider" />
         <About />
         <div className="section-divider" />
-        <Contributions />
+        <Stats />
         <div className="section-divider" />
         <Projects />
         <div className="section-divider" />
