@@ -4,51 +4,6 @@ import contribData from './contribs.json';
 import eventsData from './events.json';
 import './App.css';
 
-function Navbar() {
-  const { t, lang, setLang } = useI18n();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const ref = useRef();
-
-  useEffect(() => {
-    function handleClick(e) {
-      if (ref.current && !ref.current.contains(e.target)) setMenuOpen(false);
-    }
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, []);
-
-  return (
-    <header>
-      <div className="container">
-        <nav>
-          <a href="#" className="logo">&lt;alztrk /&gt;</a>
-          <div className="nav-links">
-            <a href="#about">{t('nav_about')}</a>
-            <a href="#projects">{t('nav_work')}</a>
-            <a href="#posts">{t('nav_posts')}</a>
-            <a href="#contact">{t('nav_contact')}</a>
-          </div>
-          <div className="nav-actions">
-            <div className="lang-dropdown" ref={ref}>
-              <button className="lang-btn" onClick={() => setMenuOpen(!menuOpen)}>
-                {lang.toUpperCase()} ▾
-              </button>
-              {menuOpen && (
-                <div className="lang-menu">
-                  <button className={'lang-option' + (lang === 'en' ? ' active' : '')} onClick={() => { setLang('en'); setMenuOpen(false); }}>EN</button>
-                  <button className={'lang-option' + (lang === 'tr' ? ' active' : '')} onClick={() => { setLang('tr'); setMenuOpen(false); }}>TR</button>
-                </div>
-              )}
-            </div>
-            <span className="hireable-badge">{t('available')}</span>
-            <ThemeToggle />
-          </div>
-        </nav>
-      </div>
-    </header>
-  );
-}
-
 function ThemeToggle() {
   const [dark, setDark] = useState(() => localStorage.getItem('theme') !== 'light');
   useEffect(() => {
@@ -154,6 +109,69 @@ function Hero() {
   );
 }
 
+function Navbar() {
+  const { t, lang, setLang } = useI18n();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [active, setActive] = useState('hero');
+  const ref = useRef();
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setMenuOpen(false);
+    }
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
+
+  useEffect(() => {
+    const sections = document.querySelectorAll('section[id]');
+    const ob = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) setActive(e.target.id);
+      });
+    }, { threshold: 0.3, rootMargin: '-64px 0px 0px 0px' });
+    sections.forEach(s => ob.observe(s));
+    return () => ob.disconnect();
+  }, []);
+
+  const links = [
+    { id: 'about', label: t('nav_about') },
+    { id: 'projects', label: t('nav_work') },
+    { id: 'posts', label: t('nav_posts') },
+    { id: 'contact', label: t('nav_contact') },
+  ];
+
+  return (
+    <header>
+      <div className="container">
+        <nav>
+          <a href="#" className="logo">&lt;alztrk /&gt;</a>
+          <div className="nav-links">
+            {links.map(l => (
+              <a key={l.id} href={'#' + l.id} className={active === l.id ? 'active' : ''}>{l.label}</a>
+            ))}
+          </div>
+          <div className="nav-actions">
+            <div className="lang-dropdown" ref={ref}>
+              <button className="lang-btn" onClick={() => setMenuOpen(!menuOpen)}>
+                {lang.toUpperCase()} ▾
+              </button>
+              {menuOpen && (
+                <div className="lang-menu">
+                  <button className={'lang-option' + (lang === 'en' ? ' active' : '')} onClick={() => { setLang('en'); setMenuOpen(false); }}>EN</button>
+                  <button className={'lang-option' + (lang === 'tr' ? ' active' : '')} onClick={() => { setLang('tr'); setMenuOpen(false); }}>TR</button>
+                </div>
+              )}
+            </div>
+            <span className="hireable-badge">{t('available')}</span>
+            <ThemeToggle />
+          </div>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
 function Section({ id, num, title, children, className = '' }) {
   const [revealed, setRevealed] = useState(false);
   const ref = useRef();
@@ -180,12 +198,6 @@ function Section({ id, num, title, children, className = '' }) {
 
 function About() {
   const { t } = useI18n();
-  const terminalLines = [
-    { cmd: 'whoami', out: t('term_whoami') },
-    { cmd: 'cat /etc/os-release', out: t('term_os') },
-    { cmd: 'stack --version', out: t('term_stack') },
-    { cmd: 'uptime', out: t('term_uptime') },
-  ];
   return (
     <Section id="about" num="01" title={t('about_title')}>
       <div className="about-grid">
@@ -203,7 +215,7 @@ function About() {
             <li><i className="devicon-html5-plain colored"></i> HTML & CSS</li>
             <li><i className="devicon-github-original colored"></i> Git & CI/CD</li>
           </ul>
-            <p style={{marginTop: 20}}>{t('about_tools')}</p>
+          <p style={{marginTop: 20}}>{t('about_tools')}</p>
           <ul className="skills">
             <li><i className="devicon-vscode-plain colored"></i> VS Code</li>
             <li><img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/copilot.svg" alt="" style={{width: 16, height: 16, marginRight: 8, verticalAlign: 'middle'}} /> GitHub Copilot</li>
@@ -211,24 +223,9 @@ function About() {
             <li><img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/opencode.svg" alt="" style={{width: 16, height: 16, marginRight: 8, verticalAlign: 'middle'}} /> opencode</li>
           </ul>
         </div>
-        <div>
+        <div className="avatar-col">
           <div className="avatar-frame">
             <img src="https://avatars.githubusercontent.com/u/139810055?v=4" alt="Alican Öztürk" className="avatar-img" />
-          </div>
-          <div className="terminal">
-            <div className="terminal-header">
-              <span className="terminal-dot"></span><span className="terminal-dot"></span><span className="terminal-dot"></span>
-              <span className="terminal-title">alztrk@dev:~</span>
-            </div>
-            <div className="terminal-body">
-              {terminalLines.map((line, i) => (
-                <React.Fragment key={i}>
-                  <div className="terminal-line"><span className="terminal-prompt">alztrk@dev</span>:<span className="terminal-cmd">~$ {line.cmd}</span></div>
-                  <div className="terminal-line"><span className="terminal-output">{line.out}</span></div>
-                </React.Fragment>
-              ))}
-              <div className="terminal-line"><span className="terminal-prompt">alztrk@dev</span>:<span className="terminal-cmd">~$ <span className="terminal-cursor"></span></span></div>
-            </div>
           </div>
         </div>
       </div>
@@ -236,35 +233,80 @@ function About() {
   );
 }
 
+function ContributionChart() {
+  const canvasRef = useRef();
+  const weeks = contribData.weeks || [];
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !weeks.length) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
+
+    const days = weeks.flatMap(w => w.contributionDays);
+    const max = Math.max(1, ...days.map(d => d.contributionCount));
+    const pad = { t: 10, r: 10, b: 20, l: 30 };
+    const cw = w - pad.l - pad.r;
+    const ch = h - pad.t - pad.b;
+
+    ctx.clearRect(0, 0, w, h);
+    const isDark = document.body.classList.contains('dark');
+    const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const textColor = isDark ? '#8a8a9a' : '#4a4a5a';
+    const barColor = isDark ? '#22c55e' : '#16a34a';
+    const barHover = isDark ? '#2ee075' : '#1db85a';
+
+    // Grid lines
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.t + (ch / 4) * i;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+      ctx.fillStyle = textColor;
+      ctx.font = '10px Inter';
+      ctx.textAlign = 'right';
+      ctx.fillText(Math.round(max - (max / 4) * i), pad.l - 6, y + 4);
+    }
+
+    // Bars
+    const barW = cw / days.length - 1;
+    days.forEach((d, i) => {
+      const x = pad.l + (cw / days.length) * i;
+      const barH = (d.contributionCount / max) * ch;
+      const y = pad.t + ch - barH;
+      ctx.fillStyle = barColor;
+      ctx.fillRect(x, y, Math.max(barW, 2), Math.max(barH, 1));
+    });
+
+    // Month labels
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    let lastM = -1;
+    days.forEach((d, i) => {
+      const m = new Date(d.date).getMonth();
+      if (m !== lastM) {
+        lastM = m;
+        ctx.fillStyle = textColor;
+        ctx.font = '9px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText(months[m], pad.l + (cw / days.length) * i, h - 2);
+      }
+    });
+  }, [weeks]);
+
+  return <canvas ref={canvasRef} style={{width: '100%', height: 160, borderRadius: 8}} />;
+}
+
 function Contributions() {
   const { t } = useI18n();
-
-  const weeks = contribData.weeks || [];
-  const cells = [];
-  const maxCount = Math.max(
-    1,
-    ...weeks.flatMap(w => w.contributionDays.map(d => d.contributionCount))
-  );
-
-  weeks.forEach(w => {
-    w.contributionDays.forEach(d => {
-      const level = d.contributionCount > 0
-        ? Math.min(Math.ceil((d.contributionCount / maxCount) * 4), 4)
-        : 0;
-      cells.push({ date: d.date, count: d.contributionCount, level });
-    });
-  });
-
   return (
     <Section id="contrib" num="02" title={t('contrib_title')}>
       <p className="contrib-label">{t('contrib_desc')} &middot; {contribData.totalContributions} {t('contrib_total')}</p>
-      <div className="contrib-container">
-        <div className="contrib-grid">
-          {cells.map((c, i) => (
-            <div key={i} className={`contrib-cell${c.level > 0 ? ' l' + c.level : ''}`} title={c.date + ': ' + c.count + ' commits'} />
-          ))}
-        </div>
-      </div>
+      <ContributionChart />
     </Section>
   );
 }
@@ -366,65 +408,75 @@ function Projects() {
   );
 }
 
+function ActivityChart() {
+  const canvasRef = useRef();
+  const rawEvents = eventsData || [];
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !rawEvents.length) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
+
+    const isDark = document.body.classList.contains('dark');
+    const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const textColor = isDark ? '#8a8a9a' : '#4a4a5a';
+    const colors = { PushEvent: '#22c55e', CreateEvent: '#06b6d4', WatchEvent: '#eab308' };
+    const pad = { t: 10, r: 10, b: 20, l: 40 };
+    const cw = w - pad.l - pad.r;
+    const ch = h - pad.t - pad.b;
+
+    const typeCount = {};
+    rawEvents.forEach(e => { typeCount[e.type] = (typeCount[e.type] || 0) + 1; });
+    const types = Object.keys(typeCount);
+    const max = Math.max(1, ...Object.values(typeCount));
+    const barW = Math.min((cw - (types.length - 1) * 8) / types.length, 60);
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Grid
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.t + (ch / 4) * i;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+      ctx.fillStyle = textColor;
+      ctx.font = '10px Inter';
+      ctx.textAlign = 'right';
+      ctx.fillText(Math.round(max - (max / 4) * i), pad.l - 6, y + 4);
+    }
+
+    // Bars
+    const labels = { PushEvent: 'Push', CreateEvent: 'Create', WatchEvent: 'Star' };
+    types.forEach((type, i) => {
+      const x = pad.l + (cw - types.length * barW - (types.length - 1) * 8) / 2 + i * (barW + 8);
+      const barH = (typeCount[type] / max) * ch;
+      const y = pad.t + ch - barH;
+      ctx.fillStyle = colors[type] || '#888';
+      ctx.beginPath();
+      ctx.roundRect(x, y, barW, Math.max(barH, 2), 4);
+      ctx.fill();
+      ctx.fillStyle = textColor;
+      ctx.font = '10px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText(labels[type] || type, x + barW / 2, h - 4);
+      ctx.fillText(typeCount[type], x + barW / 2, y - 6);
+    });
+  }, [rawEvents]);
+
+  return <canvas ref={canvasRef} style={{width: '100%', height: 180, borderRadius: 8}} />;
+}
+
 function Activity() {
   const { t } = useI18n();
-  const [openIdx, setOpenIdx] = useState(null);
-
-  const rawEvents = eventsData || [];
-  const items = rawEvents.map(e => {
-    const ago = Math.floor((Date.now() - new Date(e.created_at).getTime()) / 3600000);
-    const time = ago < 1 ? t('act_just') : ago < 24 ? ago + t('act_h') : Math.floor(ago / 24) + t('act_d');
-    return { id: e.id, type: e.type, repo: e.repo, time };
-  });
-
-  const icon = (type) => {
-    switch (type) {
-      case 'PushEvent': return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75v7.19l1.72-1.72a.75.75 0 111.06 1.06l-3 3a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06L7.25 9.44V2.25A.75.75 0 018 1.5zM2.5 12.5a.75.75 0 00-1.5 0v1a1.75 1.75 0 001.75 1.75h10.5A1.75 1.75 0 0015 13.5v-1a.75.75 0 00-1.5 0v1a.25.25 0 01-.25.25H3.75a.25.25 0 01-.25-.25v-1z"/></svg>;
-      case 'CreateEvent': return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75V7h4.75a.75.75 0 010 1.5H8.75v4.75a.75.75 0 01-1.5 0V8.5H2.5a.75.75 0 010-1.5h4.75V2.25A.75.75 0 018 1.5z"/></svg>;
-      case 'WatchEvent': return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2.5a5.5 5.5 0 00-5.5 5.5A5.5 5.5 0 008 13.5 5.5 5.5 0 0013.5 8 5.5 5.5 0 008 2.5zM8 1a7 7 0 100 14A7 7 0 008 1zm0 4a3 3 0 100 6 3 3 0 000-6z"/></svg>;
-      default: return null;
-    }
-  };
-
-  const label = (item) => {
-    switch (item.type) {
-      case 'PushEvent': return t('act_push') + ' ' + item.repo;
-      case 'CreateEvent': return t('act_create') + ' ' + t('act_in') + ' ' + item.repo;
-      case 'WatchEvent': return t('act_star');
-      default: return item.type + ' ' + t('act_in') + ' ' + item.repo;
-    }
-  };
-
   return (
     <Section id="activity" num="04" title={t('activity_title')}>
-      <div className="activity-feed">
-        {error ? <p className="activity-empty">{t('activity_error')}</p> :
-         items === null ? <p className="activity-placeholder">{t('loading')}</p> :
-         items.length === 0 ? <p className="activity-empty">{t('activity_empty')}</p> :
-         items.map((item, i) => (
-          <div key={item.id} className="activity-item">
-            <div className="activity-header" onClick={() => setOpenIdx(openIdx === i ? null : i)}>
-              <span className="activity-icon">{icon(item.type)}</span>
-              <span className="activity-label">{label(item)}</span>
-              {item.type === 'PushEvent' && item.total > 0 && (
-                <span className="activity-count">{item.total} commit</span>
-              )}
-              <span className="activity-time">{item.time}</span>
-              <span className="activity-chevron">{openIdx === i ? '▾' : '▸'}</span>
-            </div>
-            {openIdx === i && item.commits && item.commits.length > 0 && (
-              <div className="activity-commits">
-                {item.commits.map((c, j) => (
-                  <div key={j} className="activity-commit">
-                    <span className="commit-sha">{c.sha}</span>
-                    <span className="commit-msg">{c.message}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-         ))}
-      </div>
+      <ActivityChart />
     </Section>
   );
 }
