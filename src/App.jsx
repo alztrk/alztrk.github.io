@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useI18n, I18nProvider } from './I18nContext';
 import contribData from './contribs.json';
-import eventsData from './events.json';
 import repoStats from './repos.json';
 import userStats from './user.json';
+import eventsData from './events.json';
 import './App.css';
 
 function ThemeToggle() {
@@ -298,8 +298,6 @@ function ContributionChart() {
 
 function Stats() {
   const { t } = useI18n();
-  const [openIdx, setOpenIdx] = useState(null);
-  const rawEvents = eventsData || [];
   const weeks = contribData.weeks || [];
 
   const cells = [];
@@ -309,52 +307,22 @@ function Stats() {
     cells.push({ date: d.date, count: d.contributionCount, level });
   }));
 
-  const items = rawEvents.map(e => {
-    const ago = Math.floor((Date.now() - new Date(e.created_at).getTime()) / 3600000);
-    const time = ago < 1 ? t('act_just') : ago < 24 ? ago + t('act_h') : Math.floor(ago / 24) + t('act_d');
-    return { id: e.id, type: e.type, repo: e.repo, time };
-  });
-
-  const icon = (type) => {
-    switch (type) {
-      case 'PushEvent': return <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75v7.19l1.72-1.72a.75.75 0 111.06 1.06l-3 3a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06L7.25 9.44V2.25A.75.75 0 018 1.5zM2.5 12.5a.75.75 0 00-1.5 0v1a1.75 1.75 0 001.75 1.75h10.5A1.75 1.75 0 0015 13.5v-1a.75.75 0 00-1.5 0v1a.25.25 0 01-.25.25H3.75a.25.25 0 01-.25-.25v-1z"/></svg>;
-      case 'CreateEvent': return <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75V7h4.75a.75.75 0 010 1.5H8.75v4.75a.75.75 0 01-1.5 0V8.5H2.5a.75.75 0 010-1.5h4.75V2.25A.75.75 0 018 1.5z"/></svg>;
-      case 'WatchEvent': return <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2.5a5.5 5.5 0 00-5.5 5.5A5.5 5.5 0 008 13.5 5.5 5.5 0 0013.5 8 5.5 5.5 0 008 2.5zM8 1a7 7 0 100 14A7 7 0 008 1zm0 4a3 3 0 100 6 3 3 0 000-6z"/></svg>;
-      default: return null;
-    }
-  };
-
-  const label = (item) => {
-    switch (item.type) {
-      case 'PushEvent': return t('act_push') + ' ' + item.repo;
-      case 'CreateEvent': return t('act_create') + ' ' + t('act_in') + ' ' + item.repo;
-      case 'WatchEvent': return t('act_star');
-      default: return item.type + ' ' + t('act_in') + ' ' + item.repo;
-    }
-  };
-
   return (
     <Section id="stats" num="02" title={t('stats_title')}>
-      <p className="contrib-label">{t('contrib_desc')} &middot; {contribData.totalContributions} {t('contrib_total')}</p>
-      <ContributionChart />
-      <div className="contrib-grid">
-        {cells.map((c, i) => (
-          <div key={i} className={`contrib-cell${c.level > 0 ? ' l' + c.level : ''}`} title={c.date + ': ' + c.count + ' commits'} />
-        ))}
+      <div className="stats-block">
+        <p className="stats-block-title">{t('stats_contribs')}</p>
+        <ContributionChart />
+        <div className="contrib-grid">
+          {cells.map((c, i) => (
+            <div key={i} className={`contrib-cell${c.level > 0 ? ' l' + c.level : ''}`} title={c.date + ': ' + c.count + ' commits'} />
+          ))}
+        </div>
+        <p className="stats-summary">{contribData.totalContributions} {t('contrib_total')} {t('stats_in_year')}</p>
       </div>
-      <div style={{marginTop: 32}}>
+
+      <div className="stats-block">
+        <p className="stats-block-title">{t('stats_activity')}</p>
         <ActivityChart />
-      </div>
-      <div className="activity-feed" style={{marginTop: 16}}>
-        {items.map((item, i) => (
-          <div key={item.id} className="activity-item">
-            <div className="activity-header" onClick={() => setOpenIdx(openIdx === i ? null : i)}>
-              <span className="activity-icon">{icon(item.type)}</span>
-              <span className="activity-label">{label(item)}</span>
-              <span className="activity-time">{item.time}</span>
-            </div>
-          </div>
-        ))}
       </div>
     </Section>
   );

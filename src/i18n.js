@@ -12,7 +12,9 @@ export const en = {
   about_techs: "Stuff I use a lot right now:",
   about_tools: "Tools I use daily:",
   stats_title: "Statistics",
-  contrib_desc: "Last year on GitHub",
+  stats_contribs: "Contribution Activity",
+  stats_activity: "Event Breakdown",
+  stats_in_year: "in the last year",
   contrib_total: "contributions",
   activity_title: "Recent Activity",
   activity_empty: "No recent activity",
@@ -46,9 +48,6 @@ export const en = {
   act_create: "Created",
   act_in: "in",
   act_star: "Starred a repository",
-  act_just: "just now",
-  act_h: "h ago",
-  act_d: "d ago",
 };
 
 export const tr = {
@@ -65,7 +64,9 @@ export const tr = {
   about_techs: "Şu sıralar kullandıklarım:",
   about_tools: "Günlük kullandığım araçlar:",
   stats_title: "İstatistikler",
-  contrib_desc: "GitHub'da son bir yıl",
+  stats_contribs: "Katkı Aktiviteleri",
+  stats_activity: "Olay Dağılımı",
+  stats_in_year: "son bir yılda",
   contrib_total: "katkı",
   activity_title: "Son Aktiviteler",
   activity_empty: "Son aktivite yok",
