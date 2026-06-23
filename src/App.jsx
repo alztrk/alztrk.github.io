@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useI18n, I18nProvider } from './I18nContext';
+import contribData from './contribs.json';
+import eventsData from './events.json';
 import './App.css';
 
 function Navbar() {
@@ -234,8 +236,6 @@ function About() {
   );
 }
 
-import contribData from './contribs.json';
-
 function Contributions() {
   const { t } = useI18n();
 
@@ -317,12 +317,9 @@ function Projects() {
       </div>
 
       <div className="project-grid">
-        <div className="project-card">
-          <div className="project-content">
-            <div className="project-icon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            </div>
-            <h3>XFilter</h3>
+          <div className="project-card">
+            <div className="project-content">
+              <h3>XFilter</h3>
             <p>{t('xfilter_desc')}</p>
             <div className="project-tech"><span>JavaScript</span><span>Chrome API</span></div>
             <div className="project-meta">
@@ -339,12 +336,9 @@ function Projects() {
           </div>
         </div>
 
-        <div className="project-card">
-          <div className="project-content">
-            <div className="project-icon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-            </div>
-            <h3>Tengra Marketplace</h3>
+          <div className="project-card">
+            <div className="project-content">
+              <h3>Tengra Marketplace</h3>
             <p>{t('market_desc')}</p>
             <div className="project-tech"><span>JavaScript</span><span>GitHub Actions</span><span>JSON</span></div>
             <div className="project-links">
@@ -355,12 +349,9 @@ function Projects() {
           </div>
         </div>
 
-        <div className="project-card">
-          <div className="project-content">
-            <div className="project-icon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            </div>
-            <h3>Job Finder Plugin</h3>
+          <div className="project-card">
+            <div className="project-content">
+              <h3>Job Finder Plugin</h3>
             <p>{t('jobfinder_desc')}</p>
             <div className="project-tech"><span>TypeScript</span><span>AI</span><span>Plugin SDK</span></div>
             <div className="project-links">
@@ -377,38 +368,14 @@ function Projects() {
 
 function Activity() {
   const { t } = useI18n();
-  const [items, setItems] = useState(null);
-  const [error, setError] = useState(false);
   const [openIdx, setOpenIdx] = useState(null);
 
-  useEffect(() => {
-    fetch('https://api.github.com/users/alztrk/events?per_page=5').then(r => r.json()).then(async events => {
-      if (!events.length) { setItems([]); return; }
-      const result = await Promise.all(events.map(async e => {
-        const ago = Math.floor((Date.now() - new Date(e.created_at).getTime()) / 3600000);
-        const time = ago < 1 ? t('act_just') : ago < 24 ? ago + t('act_h') : Math.floor(ago / 24) + t('act_d');
-        const base = { id: e.id, type: e.type, repo: e.repo.name, time, created_at: e.created_at };
-        if (e.type === 'PushEvent' && e.payload.before && e.payload.head) {
-          try {
-            const r = await fetch(`https://api.github.com/repos/${e.repo.name}/compare/${e.payload.before}...${e.payload.head}`);
-            const d = await r.json();
-            const topFiles = d.files || [];
-            const totalAdded = topFiles.filter(f => f.status === 'added').length;
-            const totalRemoved = topFiles.filter(f => f.status === 'removed').length;
-            base.totalAdded = totalAdded;
-            base.totalRemoved = totalRemoved;
-            base.commits = (d.commits || []).map(c => ({
-              message: c.commit.message.split('\n')[0],
-              sha: c.sha.substring(0, 7),
-            }));
-            base.total = d.total_commits || base.commits.length;
-          } catch {}
-        }
-        return base;
-      }));
-      setItems(result);
-    }).catch(() => setError(true));
-  }, []);
+  const rawEvents = eventsData || [];
+  const items = rawEvents.map(e => {
+    const ago = Math.floor((Date.now() - new Date(e.created_at).getTime()) / 3600000);
+    const time = ago < 1 ? t('act_just') : ago < 24 ? ago + t('act_h') : Math.floor(ago / 24) + t('act_d');
+    return { id: e.id, type: e.type, repo: e.repo, time };
+  });
 
   const icon = (type) => {
     switch (type) {
