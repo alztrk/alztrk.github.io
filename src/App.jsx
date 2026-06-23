@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useI18n, I18nProvider } from './I18nContext';
 import './App.css';
 
@@ -79,10 +79,10 @@ function Hero() {
 
   const phrases = [
     t('hero_sub'),
-    'Mobile apps. Discord bots. AI tools.',
-    'Full-stack developer from Istanbul.',
-    'TypeScript. React Native. Node.js.',
-    'Running Tengra Studio.',
+    t('tw_phrase1'),
+    t('tw_phrase2'),
+    t('tw_phrase3'),
+    t('tw_phrase4'),
   ];
   const phraseIdx = useRef(0);
   const charIdx = useRef(0);
@@ -178,6 +178,12 @@ function Section({ id, num, title, children, className = '' }) {
 
 function About() {
   const { t } = useI18n();
+  const terminalLines = [
+    { cmd: 'whoami', out: t('term_whoami') },
+    { cmd: 'cat /etc/os-release', out: t('term_os') },
+    { cmd: 'stack --version', out: t('term_stack') },
+    { cmd: 'uptime', out: t('term_uptime') },
+  ];
   return (
     <Section id="about" num="01" title={t('about_title')}>
       <div className="about-grid">
@@ -213,14 +219,12 @@ function About() {
               <span className="terminal-title">alztrk@dev:~</span>
             </div>
             <div className="terminal-body">
-              <div className="terminal-line"><span className="terminal-prompt">alztrk@dev</span>:<span className="terminal-cmd">~$ whoami</span></div>
-              <div className="terminal-line"><span className="terminal-output">Alican Öztürk - Developer, Tengra Studio</span></div>
-              <div className="terminal-line"><span className="terminal-prompt">alztrk@dev</span>:<span className="terminal-cmd">~$ cat /etc/os-release</span></div>
-              <div className="terminal-line"><span className="terminal-output">OS: Full-Stack / Mobile / AI</span></div>
-              <div className="terminal-line"><span className="terminal-prompt">alztrk@dev</span>:<span className="terminal-cmd">~$ stack --version</span></div>
-              <div className="terminal-line"><span className="terminal-output">TypeScript, React Native, Node.js</span></div>
-              <div className="terminal-line"><span className="terminal-prompt">alztrk@dev</span>:<span className="terminal-cmd">~$ uptime</span></div>
-              <div className="terminal-line"><span className="terminal-output">uptime: 3 years - still breaking things</span></div>
+              {terminalLines.map((line, i) => (
+                <React.Fragment key={i}>
+                  <div className="terminal-line"><span className="terminal-prompt">alztrk@dev</span>:<span className="terminal-cmd">~$ {line.cmd}</span></div>
+                  <div className="terminal-line"><span className="terminal-output">{line.out}</span></div>
+                </React.Fragment>
+              ))}
               <div className="terminal-line"><span className="terminal-prompt">alztrk@dev</span>:<span className="terminal-cmd">~$ <span className="terminal-cursor"></span></span></div>
             </div>
           </div>
@@ -395,17 +399,17 @@ function Activity() {
         WatchEvent: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2.5a5.5 5.5 0 00-5.5 5.5A5.5 5.5 0 008 13.5 5.5 5.5 0 0013.5 8 5.5 5.5 0 008 2.5zM8 1a7 7 0 100 14A7 7 0 008 1zm0 4a3 3 0 100 6 3 3 0 000-6z"/></svg>',
       };
       const labels = {
-        PushEvent: e => 'Pushed to ' + e.repo.name,
-        CreateEvent: e => 'Created ' + (e.payload.ref_type || '') + ' in ' + e.repo.name,
-        WatchEvent: () => 'Starred a repository',
+        PushEvent: e => t('act_push') + ' ' + e.repo.name,
+        CreateEvent: e => t('act_create') + ' ' + (e.payload.ref_type || '') + ' ' + t('act_in') + ' ' + e.repo.name,
+        WatchEvent: () => t('act_star'),
       };
       setItems(events.map(e => ({
         icon: icons[e.type] || '',
         label: labels[e.type] ? labels[e.type](e) : e.type + ' in ' + e.repo.name,
-        time: (() => {
-          const ago = Math.floor((Date.now() - new Date(e.created_at).getTime()) / 3600000);
-          return ago < 1 ? 'just now' : ago < 24 ? ago + 'h ago' : Math.floor(ago / 24) + 'd ago';
-        })()
+          time: (() => {
+            const ago = Math.floor((Date.now() - new Date(e.created_at).getTime()) / 3600000);
+            return ago < 1 ? t('act_just') : ago < 24 ? ago + t('act_h') : Math.floor(ago / 24) + t('act_d');
+          })()
       })));
     }).catch(() => setError(true));
   }, []);
