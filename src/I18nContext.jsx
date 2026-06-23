@@ -15,6 +15,7 @@ export function I18nProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('lang', lang);
     document.documentElement.lang = lang;
+    document.title = t('title');
   }, [lang]);
 
   const t = (key) => texts[key] || key;
