@@ -201,12 +201,23 @@ function About() {
             <li><i className="devicon-html5-plain colored"></i> HTML & CSS</li>
             <li><i className="devicon-github-original colored"></i> Git & CI/CD</li>
           </ul>
-          <p style={{marginTop: 20}}>{t('about_tools')}</p>
+            <p style={{marginTop: 20}}>{t('about_tools')}</p>
           <ul className="skills">
             <li><i className="devicon-vscode-plain colored"></i> VS Code</li>
             <li><i className="devicon-github-original colored"></i> GitHub Copilot</li>
-            <li><span className="tool-icon">⚡</span> Antigravity</li>
-            <li><span className="tool-icon">✦</span> opencode</li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: 8, verticalAlign: 'middle', color: 'var(--accent)'}}>
+                <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="currentColor" opacity="0.8"/>
+              </svg>
+              Antigravity
+            </li>
+            <li>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: 8, verticalAlign: 'middle', color: 'var(--accent)'}}>
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor"/>
+                <path d="M12 6v6l4 2" stroke="currentColor"/>
+              </svg>
+              opencode
+            </li>
           </ul>
         </div>
         <div>
@@ -389,30 +400,53 @@ function Activity() {
   const { t } = useI18n();
   const [items, setItems] = useState(null);
   const [error, setError] = useState(false);
+  const [openIdx, setOpenIdx] = useState(null);
 
   useEffect(() => {
-    fetch('https://api.github.com/users/alztrk/events?per_page=6').then(r => r.json()).then(events => {
+    fetch('https://api.github.com/users/alztrk/events?per_page=5').then(r => r.json()).then(async events => {
       if (!events.length) { setItems([]); return; }
-      const icons = {
-        PushEvent: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75v7.19l1.72-1.72a.75.75 0 111.06 1.06l-3 3a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06L7.25 9.44V2.25A.75.75 0 018 1.5zM2.5 12.5a.75.75 0 00-1.5 0v1a1.75 1.75 0 001.75 1.75h10.5A1.75 1.75 0 0015 13.5v-1a.75.75 0 00-1.5 0v1a.25.25 0 01-.25.25H3.75a.25.25 0 01-.25-.25v-1z"/></svg>',
-        CreateEvent: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75V7h4.75a.75.75 0 010 1.5H8.75v4.75a.75.75 0 01-1.5 0V8.5H2.5a.75.75 0 010-1.5h4.75V2.25A.75.75 0 018 1.5z"/></svg>',
-        WatchEvent: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2.5a5.5 5.5 0 00-5.5 5.5A5.5 5.5 0 008 13.5 5.5 5.5 0 0013.5 8 5.5 5.5 0 008 2.5zM8 1a7 7 0 100 14A7 7 0 008 1zm0 4a3 3 0 100 6 3 3 0 000-6z"/></svg>',
-      };
-      const labels = {
-        PushEvent: e => t('act_push') + ' ' + e.repo.name,
-        CreateEvent: e => t('act_create') + ' ' + (e.payload.ref_type || '') + ' ' + t('act_in') + ' ' + e.repo.name,
-        WatchEvent: () => t('act_star'),
-      };
-      setItems(events.map(e => ({
-        icon: icons[e.type] || '',
-        label: labels[e.type] ? labels[e.type](e) : e.type + ' in ' + e.repo.name,
-          time: (() => {
-            const ago = Math.floor((Date.now() - new Date(e.created_at).getTime()) / 3600000);
-            return ago < 1 ? t('act_just') : ago < 24 ? ago + t('act_h') : Math.floor(ago / 24) + t('act_d');
-          })()
-      })));
+      const result = await Promise.all(events.map(async e => {
+        const ago = Math.floor((Date.now() - new Date(e.created_at).getTime()) / 3600000);
+        const time = ago < 1 ? t('act_just') : ago < 24 ? ago + t('act_h') : Math.floor(ago / 24) + t('act_d');
+        const base = { id: e.id, type: e.type, repo: e.repo.name, time, created_at: e.created_at };
+        if (e.type === 'PushEvent' && e.payload.before && e.payload.head) {
+          try {
+            const r = await fetch(`https://api.github.com/repos/${e.repo.name}/compare/${e.payload.before}...${e.payload.head}`);
+            const d = await r.json();
+            base.commits = (d.commits || []).map(c => ({
+              message: c.commit.message.split('\n')[0],
+              author: c.commit.author.name,
+              sha: c.sha.substring(0, 7),
+              added: c.files?.filter(f => f.status === 'added').length || 0,
+              removed: c.files?.filter(f => f.status === 'removed').length || 0,
+              modified: c.files?.filter(f => f.status === 'modified').length || 0,
+            }));
+            base.total = d.total_commits || base.commits.length;
+          } catch {}
+        }
+        return base;
+      }));
+      setItems(result);
     }).catch(() => setError(true));
   }, []);
+
+  const icon = (type) => {
+    switch (type) {
+      case 'PushEvent': return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75v7.19l1.72-1.72a.75.75 0 111.06 1.06l-3 3a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06L7.25 9.44V2.25A.75.75 0 018 1.5zM2.5 12.5a.75.75 0 00-1.5 0v1a1.75 1.75 0 001.75 1.75h10.5A1.75 1.75 0 0015 13.5v-1a.75.75 0 00-1.5 0v1a.25.25 0 01-.25.25H3.75a.25.25 0 01-.25-.25v-1z"/></svg>;
+      case 'CreateEvent': return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75V7h4.75a.75.75 0 010 1.5H8.75v4.75a.75.75 0 01-1.5 0V8.5H2.5a.75.75 0 010-1.5h4.75V2.25A.75.75 0 018 1.5z"/></svg>;
+      case 'WatchEvent': return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2.5a5.5 5.5 0 00-5.5 5.5A5.5 5.5 0 008 13.5 5.5 5.5 0 0013.5 8 5.5 5.5 0 008 2.5zM8 1a7 7 0 100 14A7 7 0 008 1zm0 4a3 3 0 100 6 3 3 0 000-6z"/></svg>;
+      default: return null;
+    }
+  };
+
+  const label = (item) => {
+    switch (item.type) {
+      case 'PushEvent': return t('act_push') + ' ' + item.repo;
+      case 'CreateEvent': return t('act_create') + ' ' + t('act_in') + ' ' + item.repo;
+      case 'WatchEvent': return t('act_star');
+      default: return item.type + ' ' + t('act_in') + ' ' + item.repo;
+    }
+  };
 
   return (
     <Section id="activity" num="04" title={t('activity_title')}>
@@ -421,7 +455,34 @@ function Activity() {
          items === null ? <p className="activity-placeholder">{t('loading')}</p> :
          items.length === 0 ? <p className="activity-empty">{t('activity_empty')}</p> :
          items.map((item, i) => (
-           <div key={i} className="activity-item" dangerouslySetInnerHTML={{ __html: item.icon + '<span>' + item.label + '</span><span class="activity-time">' + item.time + '</span>' }} />
+          <div key={item.id} className="activity-item">
+            <div className="activity-header" onClick={() => setOpenIdx(openIdx === i ? null : i)}>
+              <span className="activity-icon">{icon(item.type)}</span>
+              <span className="activity-label">{label(item)}</span>
+              {item.type === 'PushEvent' && item.total > 0 && (
+                <span className="activity-count">
+                  <span className="count-pos">+{item.commits?.reduce((s, c) => s + c.added, 0) || 0}</span>
+                  <span className="count-neg">-{item.commits?.reduce((s, c) => s + c.removed, 0) || 0}</span>
+                </span>
+              )}
+              <span className="activity-time">{item.time}</span>
+              <span className="activity-chevron">{openIdx === i ? '▾' : '▸'}</span>
+            </div>
+            {openIdx === i && item.commits && item.commits.length > 0 && (
+              <div className="activity-commits">
+                {item.commits.map((c, j) => (
+                  <div key={j} className="activity-commit">
+                    <span className="commit-sha">{c.sha}</span>
+                    <span className="commit-msg">{c.message}</span>
+                    <span className="commit-changes">
+                      <span className="count-pos">+{c.added}</span>
+                      <span className="count-neg">-{c.removed}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
          ))}
       </div>
     </Section>
