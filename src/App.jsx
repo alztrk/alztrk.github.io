@@ -408,13 +408,14 @@ function Activity() {
           try {
             const r = await fetch(`https://api.github.com/repos/${e.repo.name}/compare/${e.payload.before}...${e.payload.head}`);
             const d = await r.json();
+            const topFiles = d.files || [];
+            const totalAdded = topFiles.filter(f => f.status === 'added').length;
+            const totalRemoved = topFiles.filter(f => f.status === 'removed').length;
+            base.totalAdded = totalAdded;
+            base.totalRemoved = totalRemoved;
             base.commits = (d.commits || []).map(c => ({
               message: c.commit.message.split('\n')[0],
-              author: c.commit.author.name,
               sha: c.sha.substring(0, 7),
-              added: c.files?.filter(f => f.status === 'added').length || 0,
-              removed: c.files?.filter(f => f.status === 'removed').length || 0,
-              modified: c.files?.filter(f => f.status === 'modified').length || 0,
             }));
             base.total = d.total_commits || base.commits.length;
           } catch {}
@@ -456,8 +457,8 @@ function Activity() {
               <span className="activity-label">{label(item)}</span>
               {item.type === 'PushEvent' && item.total > 0 && (
                 <span className="activity-count">
-                  <span className="count-pos">+{item.commits?.reduce((s, c) => s + c.added, 0) || 0}</span>
-                  <span className="count-neg">-{item.commits?.reduce((s, c) => s + c.removed, 0) || 0}</span>
+                  <span className="count-pos">+{item.totalAdded || 0}</span>
+                  <span className="count-neg">-{item.totalRemoved || 0}</span>
                 </span>
               )}
               <span className="activity-time">{item.time}</span>
@@ -469,10 +470,6 @@ function Activity() {
                   <div key={j} className="activity-commit">
                     <span className="commit-sha">{c.sha}</span>
                     <span className="commit-msg">{c.message}</span>
-                    <span className="commit-changes">
-                      <span className="count-pos">+{c.added}</span>
-                      <span className="count-neg">-{c.removed}</span>
-                    </span>
                   </div>
                 ))}
               </div>
