@@ -47,6 +47,6 @@ const contribData = ghGraphql(query);
 const cal = contribData?.user?.contributionsCollection?.contributionCalendar;
 if (cal) writeFileSync('src/contribs.json', JSON.stringify(cal));
 
-try { run('del query.json 2>nul'); } catch {}
+try { run('rm -f query.json'); } catch {}
 
 console.log('Stats refreshed');

@@ -1,1 +1,0 @@
-{"query":"query {\n  user(login: \"alztrk\") {\n    contributionsCollection(from: \"2025-06-23T00:00:00Z\", to: \"2026-06-23T00:00:00Z\") {\n      contributionCalendar {\n        totalContributions\n        weeks { contributionDays { contributionCount date } }\n      }\n    }\n  }\n}"}

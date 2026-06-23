@@ -613,8 +613,6 @@ export default function App() {
         <div className="section-divider" />
         <Projects />
         <div className="section-divider" />
-        <Activity />
-        <div className="section-divider" />
         <Writing />
         <div className="section-divider" />
         <Contact />
