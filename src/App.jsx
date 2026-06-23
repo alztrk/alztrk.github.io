@@ -3,6 +3,7 @@ import { useI18n, I18nProvider } from './I18nContext';
 import contribData from './contribs.json';
 import eventsData from './events.json';
 import repoStats from './repos.json';
+import userStats from './user.json';
 import './App.css';
 
 function ThemeToggle() {
@@ -33,7 +34,6 @@ function ThemeToggle() {
 function Hero() {
   const { t } = useI18n();
   const [text, setText] = useState('');
-  const [stats, setStats] = useState({ repos: '15+', stars: '18+' });
 
   const phrases = [
     t('hero_sub'),
@@ -72,12 +72,6 @@ function Hero() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    fetch('https://api.github.com/users/alztrk').then(r => r.json()).then(d => {
-      if (d.public_repos) setStats({ repos: d.public_repos, stars: '18+' });
-    }).catch(() => {});
-  }, []);
-
   return (
     <section id="hero" className="hero">
       <div className="container">
@@ -88,15 +82,15 @@ function Hero() {
           <p className="hero-desc">{t('hero_desc')}</p>
           <div className="hero-stats">
             <div className="hero-stat">
-              <span className="hero-stat-num">{stats.repos}+</span>
+              <span className="hero-stat-num">{userStats.repos || 15}</span>
               <span className="hero-stat-label">{t('projects_label')}</span>
             </div>
             <div className="hero-stat">
-              <span className="hero-stat-num">{stats.stars}+</span>
+              <span className="hero-stat-num">18+</span>
               <span className="hero-stat-label">{t('stars_label')}</span>
             </div>
             <div className="hero-stat">
-              <span className="hero-stat-num">18</span>
+              <span className="hero-stat-num">{userStats.followers || 18}</span>
               <span className="hero-stat-label">{t('followers_label')}</span>
             </div>
           </div>
