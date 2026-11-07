@@ -1,1 +1,199 @@
-[{"forks":5,"stars":8},{"stars":0}]
+[
+  {
+    "name": "opencode-ip-rotator",
+    "description": "Automated Cloudflare WARP IP rotator and proxy server for OpenCode Zen. Eliminates HTTP 429 rate limits, persists usage metrics in SQLite, and provides a clean management dashboard.",
+    "stars": 34,
+    "forks": 12,
+    "language": "Python",
+    "topics": [
+      "ai-proxy",
+      "cloudflare-warp",
+      "docker-compose",
+      "fastapi",
+      "ip-rotator",
+      "llm-proxy",
+      "opencode",
+      "proxy-server",
+      "python3",
+      "rate-limit-bypass",
+      "shadcn-ui",
+      "sqlite"
+    ],
+    "url": "https://github.com/alztrk/opencode-ip-rotator",
+    "homepage": null,
+    "pushed_at": "2026-11-07T11:54:11Z"
+  },
+  {
+    "name": "OpenWidget",
+    "description": "A modern Windows desktop widget for system telemetry, weather, media, finance, clipboard history, and hardware monitoring.",
+    "stars": 10,
+    "forks": 1,
+    "language": "C#",
+    "topics": [
+      "csharp",
+      "desktop-widget",
+      "dotnet",
+      "hardware-monitoring",
+      "self-contained",
+      "system-monitor",
+      "telemetry",
+      "weather",
+      "windows",
+      "wpf"
+    ],
+    "url": "https://github.com/alztrk/OpenWidget",
+    "homepage": "https://github.com/alztrk/OpenWidget/releases",
+    "pushed_at": "2026-11-03T22:29:03Z"
+  },
+  {
+    "name": "openchat",
+    "description": "A chat app for talking with different AI models, in the cloud or on your own device.",
+    "stars": 2,
+    "forks": 0,
+    "language": "Rust",
+    "topics": [
+      "ai-assistant",
+      "ai-chat",
+      "anthropic",
+      "claude-code",
+      "codex",
+      "cross-platform",
+      "desktop-app",
+      "google-antigravity",
+      "google-gemini",
+      "llm",
+      "local-ai",
+      "local-models",
+      "multi-model",
+      "multi-provider",
+      "openai",
+      "opencode",
+      "opencode-go",
+      "opencode-zen",
+      "windows",
+      "zihora"
+    ],
+    "url": "https://github.com/alztrk/openchat",
+    "homepage": null,
+    "pushed_at": "2026-11-05T22:24:59Z"
+  },
+  {
+    "name": "awesome-turkish-dev",
+    "description": "🇹🇷 Türk yazılım geliştiricileri için küratörlü kaynak listesi — datasetler, araçlar, topluluklar, iş ilanları ve daha fazlası",
+    "stars": 1,
+    "forks": 1,
+    "language": null,
+    "topics": [],
+    "url": "https://github.com/alztrk/awesome-turkish-dev",
+    "homepage": null,
+    "pushed_at": "2026-11-01T13:01:56Z"
+  },
+  {
+    "name": "OpenMail",
+    "description": null,
+    "stars": 1,
+    "forks": 0,
+    "language": "Rust",
+    "topics": [],
+    "url": "https://github.com/alztrk/OpenMail",
+    "homepage": null,
+    "pushed_at": "2026-09-17T10:55:04Z"
+  },
+  {
+    "name": "total-nuclear-devastation",
+    "description": null,
+    "stars": 1,
+    "forks": 0,
+    "language": "AMPL",
+    "topics": [],
+    "url": "https://github.com/alztrk/total-nuclear-devastation",
+    "homepage": null,
+    "pushed_at": "2026-08-27T17:57:48Z"
+  },
+  {
+    "name": "turkish-code-instructions",
+    "description": "Türkçe kod açıklama veri seti — synthetic instruction-response pairs for Turkish code generation models",
+    "stars": 1,
+    "forks": 0,
+    "language": null,
+    "topics": [],
+    "url": "https://github.com/alztrk/turkish-code-instructions",
+    "homepage": null,
+    "pushed_at": "2026-06-23T21:17:36Z"
+  },
+  {
+    "name": "MouseKeyboardMacroRecorder",
+    "description": "Open-source Windows desktop automation for recording and replaying mouse and keyboard input.",
+    "stars": 0,
+    "forks": 0,
+    "language": "C#",
+    "topics": [],
+    "url": "https://github.com/alztrk/MouseKeyboardMacroRecorder",
+    "homepage": null,
+    "pushed_at": "2026-09-14T23:41:33Z"
+  },
+  {
+    "name": "remember-debug-log-auto-open",
+    "description": "RimWorld mod that remembers the Debug Log Auto-open setting between game sessions.",
+    "stars": 0,
+    "forks": 0,
+    "language": "C#",
+    "topics": [
+      "csharp",
+      "harmony",
+      "rimworld",
+      "rimworld-mod"
+    ],
+    "url": "https://github.com/alztrk/remember-debug-log-auto-open",
+    "homepage": null,
+    "pushed_at": "2026-08-30T13:08:40Z"
+  },
+  {
+    "name": "UniBot",
+    "description": "Universal multi-platform bot framework supporting multi-account, CLI, and daemon capabilities for X (Twitter), Telegram, Discord, and more.",
+    "stars": 0,
+    "forks": 0,
+    "language": "Python",
+    "topics": [
+      "automation",
+      "bot-framework",
+      "discord-bot",
+      "multi-platform",
+      "python",
+      "telegram-bot",
+      "twitter-bot",
+      "x-api"
+    ],
+    "url": "https://github.com/alztrk/UniBot",
+    "homepage": null,
+    "pushed_at": "2026-07-27T13:01:57Z"
+  },
+  {
+    "name": "firefox-volume-booster",
+    "description": null,
+    "stars": 0,
+    "forks": 0,
+    "language": "JavaScript",
+    "topics": [],
+    "url": "https://github.com/alztrk/firefox-volume-booster",
+    "homepage": null,
+    "pushed_at": "2026-07-16T16:26:59Z"
+  },
+  {
+    "name": "xfilter",
+    "description": "A minimalist browser extension to filter verified accounts on X.com (Twitter). Hide blue checks, whitelist follows, keyword filtering.",
+    "stars": 0,
+    "forks": 0,
+    "language": "JavaScript",
+    "topics": [
+      "browser-extension",
+      "chrome",
+      "filter",
+      "javascript",
+      "twitter"
+    ],
+    "url": "https://github.com/alztrk/xfilter",
+    "homepage": null,
+    "pushed_at": "2026-06-23T13:55:07Z"
+  }
+]

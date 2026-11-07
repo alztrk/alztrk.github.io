@@ -35,6 +35,7 @@ function ThemeToggle() {
 
 function Hero() {
   const { t } = useI18n();
+  const totalStars = repoStats.reduce((total, repo) => total + (repo.stars ?? 0), 0);
   return (
     <section id="hero" className="hero">
       <div className="container">
@@ -46,15 +47,15 @@ function Hero() {
           <p className="hero-desc">{t('hero_desc')}</p>
           <div className="hero-stats">
             <div className="hero-stat">
-              <span className="hero-stat-num">{userStats.repos || 15}</span>
+              <span className="hero-stat-num">{userStats.repos}</span>
               <span className="hero-stat-label">{t('projects_label')}</span>
             </div>
             <div className="hero-stat">
-              <span className="hero-stat-num">18+</span>
+              <span className="hero-stat-num">{totalStars}</span>
               <span className="hero-stat-label">{t('stars_label')}</span>
             </div>
             <div className="hero-stat">
-              <span className="hero-stat-num">{userStats.followers || 18}</span>
+              <span className="hero-stat-num">{userStats.followers}</span>
               <span className="hero-stat-label">{t('followers_label')}</span>
             </div>
           </div>
@@ -257,7 +258,7 @@ function LeetCodeIcon({ className = '' }) {
 }
 
 function Stats() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const weeks = useMemo(() => contribData.weeks || [], []);
   const total = contribData.totalContributions || 0;
   const allDays = weeks.flatMap(w => w.contributionDays);
@@ -269,8 +270,8 @@ function Stats() {
     { contributionCount: 0, date: '' }
   );
   const monthFormatter = useMemo(
-    () => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long' }),
-    []
+    () => new Intl.DateTimeFormat(lang === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'long' }),
+    [lang]
   );
 
   const cells = [];
@@ -310,7 +311,7 @@ function Stats() {
           </div>
           <div className="stats-inline-metric">
             <span className="stats-inline-value">
-              {busiestDay.date ? monthFormatter.format(new Date(busiestDay.date)) : '-'}
+              {busiestDay.date ? monthFormatter.format(new Date(busiestDay.date)) : ''}
             </span>
             <span className="stats-inline-label">{t('stats_peak_date')}</span>
           </div>
@@ -333,86 +334,141 @@ function Stats() {
 
 function Projects() {
   const { t } = useI18n();
-  const tengraStars = repoStats[0]?.stars ?? '?';
-  const tengraForks = repoStats[0]?.forks ?? '?';
-  const xfilterStars = repoStats[1]?.stars ?? '?';
-  const projects = [
-    {
-      title: 'XFilter',
-      desc: t('xfilter_desc'),
-      tech: ['JavaScript', 'Chrome API'],
-      metric: xfilterStars,
-      metricLabel: t('project_stars'),
-      href: 'https://github.com/alztrk/xfilter',
-    },
-    {
-      title: 'Tengra Marketplace',
-      desc: t('market_desc'),
-      tech: ['JavaScript', 'GitHub Actions', 'JSON'],
-      metric: t('project_live_registry'),
-      metricLabel: t('project_role'),
-      href: 'https://github.com/TengraStudio/tengra-market',
-    },
-    {
-      title: 'Job Finder Plugin',
-      desc: t('jobfinder_desc'),
-      tech: ['TypeScript', 'AI', 'Plugin SDK'],
-      metric: t('project_ai_plugin'),
-      metricLabel: t('project_role'),
-      href: 'https://github.com/TengraStudio/job-finder-plugin',
-    },
-  ];
+  const [projects, setProjects] = useState(repoStats);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchRepos() {
+      try {
+        const res = await fetch('https://api.github.com/users/alztrk/repos?per_page=100&sort=pushed');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!Array.isArray(data) || cancelled) return;
+
+        const ignored = new Set(['alztrk', 'alztrk.github.io']);
+        const mapped = data
+          .filter((repo) => !repo.fork && !ignored.has(repo.name))
+          .map((repo) => ({
+            name: repo.name,
+            description: repo.description,
+            stars: repo.stargazers_count,
+            forks: repo.forks_count,
+            language: repo.language,
+            topics: repo.topics || [],
+            url: repo.html_url,
+            homepage: repo.homepage || null,
+            pushed_at: repo.pushed_at,
+          }))
+          .sort((a, b) => (b.stars - a.stars) || (new Date(b.pushed_at) - new Date(a.pushed_at)));
+
+        if (!cancelled && mapped.length > 0) {
+          setProjects(mapped);
+        }
+      } catch {
+        // Keeps repoStats safely
+      }
+    }
+
+    fetchRepos();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const featured = projects[0];
+  const secondaryProjects = projects.slice(1, 7);
+
+  if (!featured) return null;
+
+  const featuredTech = [featured.language, ...(featured.topics || [])].filter(Boolean);
 
   return (
     <Section id="projects" num="03" title={t('projects_title')}>
-        <div className="project-card featured">
-          <div className="project-content">
+      <div className="project-card featured">
+        <div className="project-content">
           <p className="project-label">{t('featured_label')}</p>
           <div className="project-header-with-logo">
-            <img src="https://raw.githubusercontent.com/TengraStudio/tengra/main/assets/tengra_white_bg_black.png" alt="Tengra" className="project-logo" />
-            <h3>Tengra</h3>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="project-icon">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+            <h3>{featured.name}</h3>
           </div>
-          <div className="project-description"><p>{t('tengra_desc')}</p></div>
-          <div className="project-tech"><span>TypeScript</span><span>Electron</span><span>Rust</span><span>React</span><span>Vite</span></div>
+          {featured.description && (
+            <div className="project-description"><p>{featured.description}</p></div>
+          )}
+          {featuredTech.length > 0 && (
+            <div className="project-tech">
+              {featuredTech.map((tech) => (
+                <span key={tech}>{tech}</span>
+              ))}
+            </div>
+          )}
           <div className="project-meta">
             <span className="project-meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              <span>{tengraStars}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <span>{featured.stars}</span>
             </span>
             <span className="project-meta-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-              <span>{tengraForks}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+              </svg>
+              <span>{featured.forks}</span>
             </span>
           </div>
           <div className="project-links">
-            <a href="https://github.com/TengraStudio/tengra" target="_blank" rel="noreferrer" aria-label="GitHub">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <a href={featured.url} target="_blank" rel="noreferrer" aria-label="GitHub">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
             </a>
-            <a href="https://github.com/TengraStudio/tengra/releases" target="_blank" rel="noreferrer" className="btn-link">{t('download')}</a>
+            <a href={featured.homepage || featured.url} target="_blank" rel="noreferrer" className="btn-link">
+              {t('project_open')}
+            </a>
           </div>
         </div>
       </div>
 
       <div className="project-grid">
-        {projects.map((project) => (
-          <article key={project.title} className="project-card project-card-secondary">
-            <div className="project-content">
-              <div className="project-card-topline">
-                <span className="project-mini-label">{project.metricLabel}</span>
-                <span className="project-mini-metric">{project.metric}</span>
+        {secondaryProjects.map((project) => {
+          const techList = [project.language, ...(project.topics || [])].filter(Boolean).slice(0, 4);
+          return (
+            <article key={project.name} className="project-card project-card-secondary">
+              <div className="project-content">
+                <div className="project-card-topline">
+                  <span className="project-mini-label">{project.language || t('project_stars')}</span>
+                  <span className="project-mini-metric">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ verticalAlign: '-1px', marginRight: 4 }}>
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    {project.stars}
+                  </span>
+                </div>
+                <h3>{project.name}</h3>
+                {project.description && <p>{project.description}</p>}
+                {techList.length > 0 && (
+                  <div className="project-tech">
+                    {techList.map((item) => (
+                      <span key={item}>{item}</span>
+                    ))}
+                  </div>
+                )}
+                <div className="project-links">
+                  <a href={project.url} target="_blank" rel="noreferrer" aria-label={`${project.name} GitHub`}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                  </a>
+                  <a href={project.homepage || project.url} target="_blank" rel="noreferrer" className="btn-link">
+                    {t('project_open')}
+                  </a>
+                </div>
               </div>
-              <h3>{project.title}</h3>
-              <p>{project.desc}</p>
-              <div className="project-tech">{project.tech.map((item) => <span key={item}>{item}</span>)}</div>
-              <div className="project-links">
-                <a href={project.href} target="_blank" rel="noreferrer" aria-label={`${project.title} GitHub`}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                </a>
-                <a href={project.href} target="_blank" rel="noreferrer" className="btn-link">{t('project_open')}</a>
-              </div>
-            </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </div>
     </Section>
   );
@@ -441,7 +497,7 @@ function RecentCommits() {
             const branch = event.payload.ref?.replace('refs/heads/', '') || 'main';
             const commitResponse = await fetch(`https://api.github.com/repos/${repo}/commits/${sha}`);
             const commitData = await commitResponse.json();
-            const message = commitData.commit?.message || t('recent_commits_fallback');
+            const message = commitData.commit?.message || '';
             const [title, ...rest] = message.split('\n');
 
             return {
@@ -513,7 +569,7 @@ function RecentCommits() {
 
 function Writing() {
   const { t } = useI18n();
-  const [lcData, setLcData] = useState({ rank: '-', solved: '-' });
+  const [lcData, setLcData] = useState({ rank: '', solved: '' });
 
   useEffect(() => {
     fetch('https://alfa-leetcode-api.onrender.com/alz_trk').then(r => r.json()).then(d => {
@@ -656,4 +712,3 @@ function BackToTop() {
     </button>
   );
 }
-
