@@ -2,7 +2,7 @@
   {
     "name": "opencode-ip-rotator",
     "description": "Automated Cloudflare WARP IP rotator and proxy server for OpenCode Zen. Eliminates HTTP 429 rate limits, persists usage metrics in SQLite, and provides a clean management dashboard.",
-    "stars": 34,
+    "stars": 35,
     "forks": 12,
     "language": "Python",
     "topics": [
@@ -26,7 +26,7 @@
   {
     "name": "OpenWidget",
     "description": "A modern Windows desktop widget for system telemetry, weather, media, finance, clipboard history, and hardware monitoring.",
-    "stars": 10,
+    "stars": 11,
     "forks": 1,
     "language": "C#",
     "topics": [
@@ -43,7 +43,7 @@
     ],
     "url": "https://github.com/alztrk/OpenWidget",
     "homepage": "https://github.com/alztrk/OpenWidget/releases",
-    "pushed_at": "2026-11-03T22:29:03Z"
+    "pushed_at": "2026-11-07T23:37:06Z"
   },
   {
     "name": "openchat",
