@@ -3,7 +3,7 @@
     "name": "opencode-ip-rotator",
     "description": "Automated Cloudflare WARP IP rotator and proxy server for OpenCode Zen. Eliminates HTTP 429 rate limits, persists usage metrics in SQLite, and provides a clean management dashboard.",
     "stars": 36,
-    "forks": 12,
+    "forks": 11,
     "language": "Python",
     "topics": [
       "ai-proxy",
