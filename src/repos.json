@@ -48,7 +48,7 @@
   {
     "name": "openchat",
     "description": "A chat app for talking with different AI models, in the cloud or on your own device.",
-    "stars": 2,
+    "stars": 3,
     "forks": 0,
     "language": "Rust",
     "topics": [
