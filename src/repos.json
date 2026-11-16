@@ -120,6 +120,28 @@
     "pushed_at": "2026-06-23T21:17:36Z"
   },
   {
+    "name": "opentaskbar",
+    "description": "Lightweight macOS-inspired floating dock and taskbar replacement for Windows 10 and 11",
+    "stars": 0,
+    "forks": 0,
+    "language": "C#",
+    "topics": [
+      "csharp",
+      "customization",
+      "desktop",
+      "dock",
+      "dotnet",
+      "macos-dock",
+      "taskbar",
+      "windows",
+      "windows-11",
+      "wpf"
+    ],
+    "url": "https://github.com/alztrk/opentaskbar",
+    "homepage": null,
+    "pushed_at": "2026-11-15T21:25:34Z"
+  },
+  {
     "name": "MouseKeyboardMacroRecorder",
     "description": "Open-source Windows desktop automation for recording and replaying mouse and keyboard input.",
     "stars": 0,
