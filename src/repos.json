@@ -1,5 +1,27 @@
 [
   {
+    "name": "opentaskbar",
+    "description": "Lightweight macOS-inspired floating dock and taskbar replacement for Windows 10 and 11",
+    "stars": 72,
+    "forks": 7,
+    "language": "C#",
+    "topics": [
+      "csharp",
+      "customization",
+      "desktop",
+      "dock",
+      "dotnet",
+      "macos-dock",
+      "taskbar",
+      "windows",
+      "windows-11",
+      "wpf"
+    ],
+    "url": "https://github.com/alztrk/opentaskbar",
+    "homepage": null,
+    "pushed_at": "2026-11-16T16:22:38Z"
+  },
+  {
     "name": "opencode-ip-rotator",
     "description": "Automated Cloudflare WARP IP rotator and proxy server for OpenCode Zen. Eliminates HTTP 429 rate limits, persists usage metrics in SQLite, and provides a clean management dashboard.",
     "stars": 42,
@@ -26,7 +48,7 @@
   {
     "name": "OpenWidget",
     "description": "A modern Windows desktop widget for system telemetry, weather, media, finance, clipboard history, and hardware monitoring.",
-    "stars": 11,
+    "stars": 13,
     "forks": 1,
     "language": "C#",
     "topics": [
@@ -48,7 +70,7 @@
   {
     "name": "openchat",
     "description": "A chat app for talking with different AI models, in the cloud or on your own device.",
-    "stars": 3,
+    "stars": 4,
     "forks": 0,
     "language": "Rust",
     "topics": [
@@ -78,7 +100,7 @@
   {
     "name": "awesome-turkish-dev",
     "description": "🇹🇷 Türk yazılım geliştiricileri için küratörlü kaynak listesi — datasetler, araçlar, topluluklar, iş ilanları ve daha fazlası",
-    "stars": 1,
+    "stars": 2,
     "forks": 1,
     "language": null,
     "topics": [],
@@ -118,28 +140,6 @@
     "url": "https://github.com/alztrk/turkish-code-instructions",
     "homepage": null,
     "pushed_at": "2026-06-23T21:17:36Z"
-  },
-  {
-    "name": "opentaskbar",
-    "description": "Lightweight macOS-inspired floating dock and taskbar replacement for Windows 10 and 11",
-    "stars": 0,
-    "forks": 0,
-    "language": "C#",
-    "topics": [
-      "csharp",
-      "customization",
-      "desktop",
-      "dock",
-      "dotnet",
-      "macos-dock",
-      "taskbar",
-      "windows",
-      "windows-11",
-      "wpf"
-    ],
-    "url": "https://github.com/alztrk/opentaskbar",
-    "homepage": null,
-    "pushed_at": "2026-11-15T21:25:34Z"
   },
   {
     "name": "MouseKeyboardMacroRecorder",
