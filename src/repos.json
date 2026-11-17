@@ -2,8 +2,8 @@
   {
     "name": "opentaskbar",
     "description": "Lightweight macOS-inspired floating dock and taskbar replacement for Windows 10 and 11",
-    "stars": 117,
-    "forks": 11,
+    "stars": 146,
+    "forks": 15,
     "language": "C#",
     "topics": [
       "csharp",
@@ -19,7 +19,7 @@
     ],
     "url": "https://github.com/alztrk/opentaskbar",
     "homepage": null,
-    "pushed_at": "2026-11-17T07:33:31Z"
+    "pushed_at": "2026-11-17T20:12:16Z"
   },
   {
     "name": "opencode-ip-rotator",
@@ -48,7 +48,7 @@
   {
     "name": "OpenWidget",
     "description": "A modern Windows desktop widget for system telemetry, weather, media, finance, clipboard history, and hardware monitoring.",
-    "stars": 13,
+    "stars": 14,
     "forks": 1,
     "language": "C#",
     "topics": [
@@ -111,7 +111,7 @@
   {
     "name": "OpenMail",
     "description": null,
-    "stars": 1,
+    "stars": 2,
     "forks": 0,
     "language": "Rust",
     "topics": [],
