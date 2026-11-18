@@ -2,8 +2,8 @@
   {
     "name": "opentaskbar",
     "description": "Lightweight macOS-inspired floating dock and taskbar replacement for Windows 10 and 11",
-    "stars": 146,
-    "forks": 15,
+    "stars": 151,
+    "forks": 14,
     "language": "C#",
     "topics": [
       "csharp",
@@ -19,12 +19,12 @@
     ],
     "url": "https://github.com/alztrk/opentaskbar",
     "homepage": null,
-    "pushed_at": "2026-11-17T20:12:16Z"
+    "pushed_at": "2026-11-18T00:19:12Z"
   },
   {
     "name": "opencode-ip-rotator",
     "description": "Automated Cloudflare WARP IP rotator and proxy server for OpenCode Zen. Eliminates HTTP 429 rate limits, persists usage metrics in SQLite, and provides a clean management dashboard.",
-    "stars": 42,
+    "stars": 43,
     "forks": 12,
     "language": "Python",
     "topics": [
@@ -71,7 +71,7 @@
     "name": "openchat",
     "description": "A chat app for talking with different AI models, in the cloud or on your own device.",
     "stars": 4,
-    "forks": 0,
+    "forks": 1,
     "language": "Rust",
     "topics": [
       "ai-assistant",
@@ -100,7 +100,7 @@
   {
     "name": "awesome-turkish-dev",
     "description": "🇹🇷 Türk yazılım geliştiricileri için küratörlü kaynak listesi — datasetler, araçlar, topluluklar, iş ilanları ve daha fazlası",
-    "stars": 3,
+    "stars": 4,
     "forks": 1,
     "language": null,
     "topics": [],
