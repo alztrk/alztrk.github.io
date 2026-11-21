@@ -2,8 +2,8 @@
   {
     "name": "opentaskbar",
     "description": "Lightweight macOS-inspired floating dock and taskbar replacement for Windows 10 and 11",
-    "stars": 187,
-    "forks": 19,
+    "stars": 203,
+    "forks": 21,
     "language": "C#",
     "topics": [
       "csharp",
@@ -19,7 +19,7 @@
     ],
     "url": "https://github.com/alztrk/opentaskbar",
     "homepage": null,
-    "pushed_at": "2026-11-20T23:56:48Z"
+    "pushed_at": "2026-11-21T08:54:00Z"
   },
   {
     "name": "opencode-ip-rotator",
@@ -131,6 +131,17 @@
     "pushed_at": "2026-08-27T17:57:48Z"
   },
   {
+    "name": "firefox-volume-booster",
+    "description": null,
+    "stars": 1,
+    "forks": 1,
+    "language": "JavaScript",
+    "topics": [],
+    "url": "https://github.com/alztrk/firefox-volume-booster",
+    "homepage": null,
+    "pushed_at": "2026-07-16T16:26:59Z"
+  },
+  {
     "name": "turkish-code-instructions",
     "description": "Türkçe kod açıklama veri seti — synthetic instruction-response pairs for Turkish code generation models",
     "stars": 1,
@@ -187,17 +198,6 @@
     "url": "https://github.com/alztrk/UniBot",
     "homepage": null,
     "pushed_at": "2026-07-27T13:01:57Z"
-  },
-  {
-    "name": "firefox-volume-booster",
-    "description": null,
-    "stars": 0,
-    "forks": 0,
-    "language": "JavaScript",
-    "topics": [],
-    "url": "https://github.com/alztrk/firefox-volume-booster",
-    "homepage": null,
-    "pushed_at": "2026-07-16T16:26:59Z"
   },
   {
     "name": "xfilter",
