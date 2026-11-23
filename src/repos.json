@@ -2,7 +2,7 @@
   {
     "name": "opentaskbar",
     "description": "Lightweight macOS-inspired floating dock and taskbar replacement for Windows 10 and 11",
-    "stars": 272,
+    "stars": 276,
     "forks": 23,
     "language": "C#",
     "topics": [
@@ -24,12 +24,12 @@
     ],
     "url": "https://github.com/alztrk/opentaskbar",
     "homepage": null,
-    "pushed_at": "2026-11-22T18:13:56Z"
+    "pushed_at": "2026-11-22T21:32:42Z"
   },
   {
     "name": "opencode-ip-rotator",
     "description": "Automated Cloudflare WARP IP rotator and proxy server for OpenCode Zen. Eliminates HTTP 429 rate limits, persists usage metrics in SQLite, and provides a clean management dashboard.",
-    "stars": 45,
+    "stars": 47,
     "forks": 14,
     "language": "Python",
     "topics": [
