@@ -2,8 +2,8 @@
   {
     "name": "opentaskbar",
     "description": "Lightweight macOS-inspired floating dock and taskbar replacement for Windows 10 and 11",
-    "stars": 276,
-    "forks": 23,
+    "stars": 290,
+    "forks": 25,
     "language": "C#",
     "topics": [
       "csharp",
