@@ -2,8 +2,8 @@
   {
     "name": "opentaskbar",
     "description": "Lightweight macOS-inspired floating dock and taskbar replacement for Windows 10 and 11",
-    "stars": 325,
-    "forks": 31,
+    "stars": 346,
+    "forks": 33,
     "language": "C#",
     "topics": [
       "csharp",
@@ -24,7 +24,7 @@
     ],
     "url": "https://github.com/alztrk/opentaskbar",
     "homepage": null,
-    "pushed_at": "2026-11-24T15:02:30Z"
+    "pushed_at": "2026-11-24T19:56:21Z"
   },
   {
     "name": "opencode-ip-rotator",
