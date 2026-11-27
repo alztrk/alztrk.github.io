@@ -2,9 +2,9 @@
   {
     "name": "opentaskbar",
     "description": "Lightweight macOS-inspired floating dock and taskbar replacement for Windows 10 and 11",
-    "stars": 409,
-    "forks": 41,
-    "language": "C#",
+    "stars": 432,
+    "forks": 40,
+    "language": "Rust",
     "topics": [
       "csharp",
       "customization",
@@ -24,13 +24,13 @@
     ],
     "url": "https://github.com/alztrk/opentaskbar",
     "homepage": null,
-    "pushed_at": "2026-11-27T11:04:34Z"
+    "pushed_at": "2026-11-27T18:52:56Z"
   },
   {
     "name": "opencode-ip-rotator",
     "description": "Automated Cloudflare WARP IP rotator and proxy server for OpenCode Zen. Eliminates HTTP 429 rate limits, persists usage metrics in SQLite, and provides a clean management dashboard.",
     "stars": 50,
-    "forks": 14,
+    "forks": 15,
     "language": "Python",
     "topics": [
       "ai-proxy",
@@ -53,7 +53,7 @@
   {
     "name": "OpenWidget",
     "description": "A modern Windows desktop widget for system telemetry, weather, media, finance, clipboard history, and hardware monitoring.",
-    "stars": 14,
+    "stars": 15,
     "forks": 1,
     "language": "C#",
     "topics": [
@@ -73,20 +73,9 @@
     "pushed_at": "2026-11-20T22:27:50Z"
   },
   {
-    "name": "awesome-turkish-dev",
-    "description": "🇹🇷 Türk yazılım geliştiricileri için küratörlü kaynak listesi — datasetler, araçlar, topluluklar, iş ilanları ve daha fazlası",
-    "stars": 5,
-    "forks": 1,
-    "language": null,
-    "topics": [],
-    "url": "https://github.com/alztrk/awesome-turkish-dev",
-    "homepage": null,
-    "pushed_at": "2026-11-01T13:01:56Z"
-  },
-  {
     "name": "openchat",
     "description": "A chat app for talking with different AI models, in the cloud or on your own device.",
-    "stars": 4,
+    "stars": 5,
     "forks": 1,
     "language": "Rust",
     "topics": [
@@ -112,6 +101,17 @@
     "url": "https://github.com/alztrk/openchat",
     "homepage": null,
     "pushed_at": "2026-11-26T04:36:06Z"
+  },
+  {
+    "name": "awesome-turkish-dev",
+    "description": "🇹🇷 Türk yazılım geliştiricileri için küratörlü kaynak listesi — datasetler, araçlar, topluluklar, iş ilanları ve daha fazlası",
+    "stars": 5,
+    "forks": 1,
+    "language": null,
+    "topics": [],
+    "url": "https://github.com/alztrk/awesome-turkish-dev",
+    "homepage": null,
+    "pushed_at": "2026-11-01T13:01:56Z"
   },
   {
     "name": "OpenMail",
